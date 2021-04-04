@@ -1,6 +1,6 @@
-import java.io.IOException;
+import UserInterface.ConsoleUserInterface;
+
 import java.util.Scanner;
-import java.sql.*;
 
 public class Main {
 
@@ -10,17 +10,17 @@ public class Main {
 
         int action;
 
-        UserInterface inte = new UserInterface();
+        ConsoleUserInterface ui = new ConsoleUserInterface();
 
         Scanner in = new Scanner(System.in);
         action = in.nextInt();//TODO Secure and limit the action choice method
 
 
-        inte.GetCredentials();
+        ui.GetCredentials();
 
         switch (action) {
-            case (1) -> inte.Login();
-            case (2) -> inte.Register();
+            case (1) -> ui.Login();
+            case (2) -> ui.Register();
         }
 
 
