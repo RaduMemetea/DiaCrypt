@@ -1,7 +1,7 @@
 package DatabaseContext;
 
 import DataModels.*;
-import DataModels.Complex.UserDiary;
+import DataModels.Complex.FullDiary;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface IDbContext {
 
     Page GetPage(Integer PageID);
 
-    UserDiary GetUserDiary(Integer UserID);
+    FullDiary GetUserDiary(Integer UserID);
 
 
     //Post

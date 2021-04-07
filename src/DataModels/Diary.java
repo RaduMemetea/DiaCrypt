@@ -1,6 +1,9 @@
 package DataModels;
 
+import java.sql.Timestamp;
+
 public class Diary {
-    public Integer UserID;
-    public Integer PageID;
+    public Integer ID;
+    public String Title;
+    public Timestamp CreationDate;
 }

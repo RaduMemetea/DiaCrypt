@@ -1,27 +1,24 @@
+import DatabaseContext.MariaDbContext;
 import UserInterface.ConsoleUserInterface;
 
-import java.util.Scanner;
+import java.sql.SQLException;
 
 public class Main {
 
-    public static void main(String[] args) {
-        System.out.print("Hello Dreamer!\nPlease chose an action:\n");
-        System.out.print("[1] Log In \\ [2] Register\n:> ");
+    public static void main(String[] args) {// it's required that arg0 is the database connection username and arg1 is the password
 
-        int action;
-
-        ConsoleUserInterface ui = new ConsoleUserInterface();
-
-        Scanner in = new Scanner(System.in);
-        action = in.nextInt();//TODO Secure and limit the action choice method
-
-
-        ui.GetCredentials();
-
-        switch (action) {
-            case (1) -> ui.Login();
-            case (2) -> ui.Register();
+        try {
+            MariaDbContext.CreateDbInstance(args[0], args[1]); //Initialize the database driver, instance and connection.
+        } catch (SQLException throwables) {
+            System.err.println("The attempt to initialize database connection failed!...");
+            throwables.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            System.err.println("The attempt to initialize the database driver class failed!...");
+            e.printStackTrace();
         }
+
+
+        new ConsoleUserInterface();
 
 
     }
