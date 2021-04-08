@@ -158,17 +158,54 @@ public class MariaDbContext implements IDbContext {
 
 
     @Override
-    public User DeleteUser(User user) {
-        return null;
+    public Integer DeleteUser(Integer userID) throws SQLException {
+        String sqlStatement = "DELETE FROM `DiaCrypt`.`User`WHERE ID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, userID);
+            return prepStatement.executeUpdate();
+        }
     }
 
     @Override
-    public Diary DeleteDiary(Diary diary) {
-        return null;
+    public Integer DeleteUserDiary(Integer userID, Integer diaryID) throws SQLException {
+        String sqlStatement = "DELETE FROM `DiaCrypt`.`UserDiary`WHERE UserID = ? AND DiaryID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, userID);
+            prepStatement.setInt(2, diaryID);
+            return prepStatement.executeUpdate();
+        }
     }
 
     @Override
-    public Page DeletePage(Page page) {
-        return null;
+    public Integer DeleteDiary(Integer diaryID) throws SQLException {
+        String sqlStatement = "DELETE FROM `DiaCrypt`.`Diary`WHERE ID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, diaryID);
+            return prepStatement.executeUpdate();
+        }
+    }
+
+    @Override
+    public Integer DeleteDiaryPages(Integer diaryID, Integer pageID) throws SQLException {
+        String sqlStatement = "DELETE FROM `DiaCrypt`.`DiaryPages`WHERE DiaryID = ? AND PageID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, diaryID);
+            prepStatement.setInt(2, pageID);
+            return prepStatement.executeUpdate();
+        }
+    }
+
+    @Override
+    public Integer DeletePage(Integer pageID) throws SQLException {
+        String sqlStatement = "DELETE FROM `DiaCrypt`.`Page`WHERE ID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, pageID);
+            return prepStatement.executeUpdate();
+        }
     }
 }

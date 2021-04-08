@@ -45,11 +45,15 @@ public interface IDbContext {
 
     //Delete
 
-    User DeleteUser(User user);
+    Integer DeleteUser(Integer userID) throws SQLException;
 
-    Diary DeleteDiary(Diary diary);
+    Integer DeleteUserDiary(Integer userID, Integer diaryID) throws SQLException;
 
-    Page DeletePage(Page page);
+    Integer DeleteDiary(Integer diaryID) throws SQLException;
+
+    Integer DeleteDiaryPages(Integer diaryID, Integer pageID) throws SQLException;
+
+    Integer DeletePage(Integer pageID) throws SQLException;
 
 
 }
