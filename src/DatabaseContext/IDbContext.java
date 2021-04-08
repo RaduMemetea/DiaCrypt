@@ -3,6 +3,7 @@ package DatabaseContext;
 import DataModels.*;
 import DataModels.Complex.FullDiary;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface IDbContext {
@@ -22,11 +23,15 @@ public interface IDbContext {
 
     //Post
 
-    User PostUser(User user);
+    Integer PostUser(User user) throws SQLException;
 
-    Diary PostDiary(Diary diary);
+    Integer PostUserDiary(UserDiary userDiary) throws SQLException;
 
-    Page PostPage(Page page);
+    Integer PostDiary(Diary diary) throws SQLException;
+
+    Integer PostDiaryPages(DiaryPages diaryPages) throws SQLException;
+
+    Integer PostPage(Page page) throws SQLException;
 
 
     //Put

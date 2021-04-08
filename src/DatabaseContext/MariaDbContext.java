@@ -14,8 +14,6 @@ public class MariaDbContext implements IDbContext {
     private final String PASS;
 
     Connection conn = null;
-    Statement stmt = null;
-
 
     private MariaDbContext(String user, String pass) {
         USER = user;
@@ -46,12 +44,6 @@ public class MariaDbContext implements IDbContext {
 
     public void Close() throws SQLException {
         if (conn == null) return;
-
-        if (stmt != null) {
-            stmt.close();
-            stmt = null;
-        }
-
         conn.close();
         conn = null;
     }
@@ -84,18 +76,68 @@ public class MariaDbContext implements IDbContext {
 
 
     @Override
-    public User PostUser(User user) {
-        return null;
+    public Integer PostUser(User user) throws SQLException {
+
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`User`(`ID`,`Username`,`Password`,`Salt`) VALUES(?, ?, ?, ?);";
+
+        try (PreparedStatement postUser = conn.prepareStatement(sqlStatement)) {
+            postUser.setInt(1, 0);
+            postUser.setString(2, user.Username);
+            postUser.setString(3, user.Password);
+            postUser.setString(4, user.Salt);
+
+            return postUser.executeUpdate();
+        }
     }
 
     @Override
-    public Diary PostDiary(Diary diary) {
-        return null;
+    public Integer PostUserDiary(UserDiary userDiary) throws SQLException {
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`UserDiary`(`DiaryID`,`UserID`) VALUES(?,?);";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, userDiary.DiaryID);
+            prepStatement.setInt(2, userDiary.UserID);
+
+            return prepStatement.executeUpdate();
+        }
     }
 
     @Override
-    public Page PostPage(Page page) {
-        return null;
+    public Integer PostDiary(Diary diary) throws SQLException {
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`Diary`(`ID`,`Title`,`CreationDate`) VALUES(?,?,?);";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, 0);
+            prepStatement.setString(2, diary.Title);
+            prepStatement.setTimestamp(3, diary.CreationDate);
+
+            return prepStatement.executeUpdate();
+        }
+    }
+
+    @Override
+    public Integer PostDiaryPages(DiaryPages diaryPages) throws SQLException {
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`DiaryPages`(`DiaryID`,`PageID`) VALUES(?,?);";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, diaryPages.DiaryID);
+            prepStatement.setInt(2, diaryPages.PageID);
+
+            return prepStatement.executeUpdate();
+        }
+    }
+
+    @Override
+    public Integer PostPage(Page page) throws SQLException {
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`Page`(`ID`,`Number`,`Text`) VALUES(?,?,?);";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, 0);
+            prepStatement.setInt(2, page.Number);
+            prepStatement.setString(3, page.Text);
+
+            return prepStatement.executeUpdate();
+        }
     }
 
 
