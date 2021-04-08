@@ -36,11 +36,11 @@ public interface IDbContext {
 
     //Put
 
-    User PutUser(User user);
+    Integer PutUser(User user) throws SQLException;
 
-    Diary PutDiary(Diary diary);
+    Integer PutDiary(Diary diary) throws SQLException;
 
-    Page PutPage(Page page);
+    Integer PutPage(Page page) throws SQLException;
 
 
     //Delete

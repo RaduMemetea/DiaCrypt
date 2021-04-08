@@ -142,18 +142,43 @@ public class MariaDbContext implements IDbContext {
 
 
     @Override
-    public User PutUser(User user) {
-        return null;
+    public Integer PutUser(User user) throws SQLException {
+        String sqlStatement = "UPDATE `DiaCrypt`.`User` SET `Username` = ?, `Password` = ?, `Salt` = ? WHERE `ID` = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setString(1, user.Username);
+            prepStatement.setString(2, user.Password);
+            prepStatement.setString(3, user.Salt);
+            prepStatement.setInt(4, user.ID);
+
+            return prepStatement.executeUpdate();
+        }
     }
 
     @Override
-    public Diary PutDiary(Diary diary) {
-        return null;
+    public Integer PutDiary(Diary diary) throws SQLException {
+        String sqlStatement = "UPDATE `DiaCrypt`.`Diary` SET `Title` = ?, `CreationDate` = ? WHERE `ID` = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setString(1, diary.Title);
+            prepStatement.setTimestamp(2, diary.CreationDate);
+            prepStatement.setInt(3, diary.ID);
+
+            return prepStatement.executeUpdate();
+        }
     }
 
     @Override
-    public Page PutPage(Page page) {
-        return null;
+    public Integer PutPage(Page page) throws SQLException {
+        String sqlStatement = "UPDATE `DiaCrypt`.`Page` SET `Number` = ?, `Text` = ? WHERE `ID` = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, page.Number);
+            prepStatement.setString(2, page.Text);
+            prepStatement.setInt(3, page.ID);
+
+            return prepStatement.executeUpdate();
+        }
     }
 
 
