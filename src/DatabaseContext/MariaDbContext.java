@@ -50,28 +50,107 @@ public class MariaDbContext implements IDbContext {
 
 
     @Override
-    public User GetUser(Integer UserID) {
-        return null;
+    public Integer GetUserID(String username, String password) throws SQLException {
+        String sqlStatement = "SELECT `User`.`ID` FROM `DiaCrypt`.`User` WHERE Username = ? AND Password = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setString(1, username);
+            prepStatement.setString(2, password);
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            rs.next();
+            return rs.getInt("ID");
+
+        }
     }
 
     @Override
-    public User GetUser(String Username) {
-        return null;
+    public UserDiary GetUserDiary(Integer userID, Integer diaryID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`UserDiary` WHERE UserID = ? AND DiaryID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, userID);
+            prepStatement.setInt(2, diaryID);
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            UserDiary userDiary = new UserDiary();
+
+            while (rs.next()) {
+                userDiary.UserID = rs.getInt("UserID");
+                userDiary.DiaryID = rs.getInt("DiaryID");
+            }
+
+            return userDiary;
+        }
     }
 
     @Override
-    public List<Diary> GetDiary(Integer UserID) {
-        return null;
+    public Diary GetDiary(Integer diaryID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`Diary` WHERE ID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, diaryID);
+
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            Diary diary = new Diary();
+
+            while (rs.next()) {
+                diary.ID = rs.getInt("ID");
+                diary.Title = rs.getString("Title");
+                diary.CreationDate = rs.getTimestamp("CreationDate");
+            }
+
+
+            return diary;
+        }
     }
 
     @Override
-    public Page GetPage(Integer PageID) {
-        return null;
+    public DiaryPage GetDiaryPage(Integer diaryID, Integer pageID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`DiaryPage` WHERE DiaryID = ? AND PageID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, diaryID);
+            prepStatement.setInt(2, pageID);
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            DiaryPage diaryPage = new DiaryPage();
+
+            while (rs.next()) {
+                diaryPage.DiaryID = rs.getInt("DiaryID");
+                diaryPage.PageID = rs.getInt("PageID");
+            }
+
+            return diaryPage;
+        }
     }
 
     @Override
-    public FullDiary GetUserDiary(Integer UserID) {
-        return null;
+    public Page GetPage(Integer pageID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`Page` WHERE ID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, pageID);
+
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            Page page = new Page();
+
+            while (rs.next()) {
+                page.ID = rs.getInt("ID");
+                page.Text = rs.getString("Text");
+                page.Number = rs.getInt("Number");
+            }
+
+
+            return page;
+        }
     }
 
 
@@ -116,12 +195,12 @@ public class MariaDbContext implements IDbContext {
     }
 
     @Override
-    public Integer PostDiaryPages(DiaryPages diaryPages) throws SQLException {
-        String sqlStatement = "INSERT INTO `DiaCrypt`.`DiaryPages`(`DiaryID`,`PageID`) VALUES(?,?);";
+    public Integer PostDiaryPage(DiaryPage diaryPage) throws SQLException {
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`DiaryPage`(`DiaryID`,`PageID`) VALUES(?,?);";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
-            prepStatement.setInt(1, diaryPages.DiaryID);
-            prepStatement.setInt(2, diaryPages.PageID);
+            prepStatement.setInt(1, diaryPage.DiaryID);
+            prepStatement.setInt(2, diaryPage.PageID);
 
             return prepStatement.executeUpdate();
         }
@@ -214,8 +293,8 @@ public class MariaDbContext implements IDbContext {
     }
 
     @Override
-    public Integer DeleteDiaryPages(Integer diaryID, Integer pageID) throws SQLException {
-        String sqlStatement = "DELETE FROM `DiaCrypt`.`DiaryPages`WHERE DiaryID = ? AND PageID = ?;";
+    public Integer DeleteDiaryPage(Integer diaryID, Integer pageID) throws SQLException {
+        String sqlStatement = "DELETE FROM `DiaCrypt`.`DiaryPage`WHERE DiaryID = ? AND PageID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, diaryID);
