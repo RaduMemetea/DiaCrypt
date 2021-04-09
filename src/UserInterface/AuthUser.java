@@ -1,5 +1,6 @@
 package UserInterface;
 
+import DataModels.Complex.FullDiary;
 import DataModels.Diary;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class AuthUser {
     private final Integer ID;
     private final String Username;
     private List<Diary> Diaries; // All diaries data(excluding contents) that belong to thew current user
-
+    private FullDiary Diary;
 
     private AuthUser(Integer id, String username) {
         ID = id;

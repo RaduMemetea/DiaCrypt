@@ -5,7 +5,6 @@ import DataModels.Page;
 
 import java.util.List;
 
-public class FullDiary {
-    public Diary Info;
+public class FullDiary extends Diary {
     public List<Page> Pages;
 }

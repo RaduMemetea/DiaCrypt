@@ -4,6 +4,7 @@ import DataModels.*;
 import DataModels.Complex.FullDiary;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface IDbContext {
 
@@ -13,16 +14,21 @@ public interface IDbContext {
 
     Integer GetUserID(String username, String password) throws SQLException;
 
-    UserDiary GetUserDiary(Integer userID, Integer diaryID) throws SQLException;
+    List<UserDiary> GetUserDiary(Integer userID) throws SQLException;
 
     Diary GetDiary(Integer diaryID) throws SQLException; // Returns all entries that make a diary(all page ID's) for a user
 
-    DiaryPage GetDiaryPage(Integer diaryID, Integer pageID) throws SQLException;
+    List<DiaryPage> GetDiaryPage(Integer diaryID) throws SQLException;
 
     Page GetPage(Integer pageID) throws SQLException;
 
 
     //Get
+
+
+    FullDiary GetFullDiary(Integer diaryID) throws SQLException;
+
+    List<Diary> GetUserDiaries(Integer userID) throws SQLException;
 
 
     //Post

@@ -1,11 +1,14 @@
 package DatabaseContext;
 
 import DataModels.*;
+import DataModels.Complex.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class DbContextMethods implements IDbContext {
 
@@ -30,23 +33,23 @@ public abstract class DbContextMethods implements IDbContext {
     }
 
 
-    public UserDiary GetUserDiary(Integer userID, Integer diaryID) throws SQLException {
-        String sqlStatement = "SELECT * FROM `DiaCrypt`.`UserDiary` WHERE UserID = ? AND DiaryID = ?;";
+    public List<UserDiary> GetUserDiary(Integer userID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`UserDiary` WHERE UserID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, userID);
-            prepStatement.setInt(2, diaryID);
 
             ResultSet rs = prepStatement.executeQuery();
 
-            UserDiary userDiary = new UserDiary();
-
+            List<UserDiary> userDiarys = new ArrayList<UserDiary>();
+            UserDiary ud = new UserDiary();
             while (rs.next()) {
-                userDiary.UserID = rs.getInt("UserID");
-                userDiary.DiaryID = rs.getInt("DiaryID");
+                ud.UserID = rs.getInt("UserID");
+                ud.DiaryID = rs.getInt("DiaryID");
+                userDiarys.add(ud);
             }
 
-            return userDiary;
+            return userDiarys;
         }
     }
 
@@ -62,11 +65,10 @@ public abstract class DbContextMethods implements IDbContext {
 
             Diary diary = new Diary();
 
-            while (rs.next()) {
-                diary.ID = rs.getInt("ID");
-                diary.Title = rs.getString("Title");
-                diary.CreationDate = rs.getTimestamp("CreationDate");
-            }
+            rs.next();
+            diary.ID = rs.getInt("ID");
+            diary.Title = rs.getString("Title");
+            diary.CreationDate = rs.getTimestamp("CreationDate");
 
 
             return diary;
@@ -74,23 +76,26 @@ public abstract class DbContextMethods implements IDbContext {
     }
 
 
-    public DiaryPage GetDiaryPage(Integer diaryID, Integer pageID) throws SQLException {
-        String sqlStatement = "SELECT * FROM `DiaCrypt`.`DiaryPage` WHERE DiaryID = ? AND PageID = ?;";
+    public List<DiaryPage> GetDiaryPage(Integer diaryID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`DiaryPage` WHERE DiaryID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, diaryID);
-            prepStatement.setInt(2, pageID);
 
             ResultSet rs = prepStatement.executeQuery();
 
-            DiaryPage diaryPage = new DiaryPage();
+            List<DiaryPage> diaryPages = new ArrayList<DiaryPage>();
 
+            DiaryPage dp = new DiaryPage();
             while (rs.next()) {
-                diaryPage.DiaryID = rs.getInt("DiaryID");
-                diaryPage.PageID = rs.getInt("PageID");
+
+                dp.DiaryID = rs.getInt("DiaryID");
+                dp.PageID = rs.getInt("PageID");
+
+                diaryPages.add(dp);
             }
 
-            return diaryPage;
+            return diaryPages;
         }
     }
 
@@ -106,18 +111,51 @@ public abstract class DbContextMethods implements IDbContext {
 
             Page page = new Page();
 
-            while (rs.next()) {
-                page.ID = rs.getInt("ID");
-                page.Text = rs.getString("Text");
-                page.Number = rs.getInt("Number");
-            }
+            rs.next();
+            page.ID = rs.getInt("ID");
+            page.Text = rs.getString("Text");
+            page.Number = rs.getInt("Number");
 
 
             return page;
         }
     }
 
+
     //Get
+
+
+    public List<Diary> GetUserDiaries(Integer userID) throws SQLException {
+
+        List<UserDiary> udLinks = GetUserDiary(userID);
+
+        List<Diary> userDiaries = new ArrayList<>();
+
+        for (UserDiary u : udLinks) {
+            var diary = GetDiary(u.DiaryID);
+            userDiaries.add(diary);
+        }
+
+        return userDiaries;
+
+    }
+
+    public FullDiary GetFullDiary(Integer diaryID) throws SQLException {
+        FullDiary fullDiary = new FullDiary();
+
+        var diary = GetDiary(diaryID);
+        fullDiary.ID = diary.ID;
+        fullDiary.Title = diary.Title;
+        fullDiary.CreationDate = diary.CreationDate;
+
+        List<DiaryPage> dpLinks = GetDiaryPage(fullDiary.ID);
+
+        for (DiaryPage dp : dpLinks) {
+            var page = GetPage(dp.PageID);
+            fullDiary.Pages.add(page);
+        }
+        return fullDiary;
+    }
 
 
     //Post
