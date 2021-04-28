@@ -18,7 +18,7 @@ public abstract class DbContextMethods implements IDbContext {
     //Get Base
 
     public Integer GetUserID(String username, String password) throws SQLException {
-        String sqlStatement = "SELECT `User`.`ID` FROM `DiaCrypt`.`User` WHERE Username = ? AND Password = ?;";
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`User` WHERE Username = ? AND Password = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setString(1, username);
@@ -32,6 +32,20 @@ public abstract class DbContextMethods implements IDbContext {
         }
     }
 
+    public String GetUserSalt(String username) throws SQLException {
+        String sqlStatement = "SELECT `User`.`Salt` FROM `DiaCrypt`.`User` WHERE Username = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setString(1, username);
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            rs.next();
+            return rs.getString("Salt");
+
+        }
+    }
+
 
     public List<UserDiary> GetUserDiary(Integer userID) throws SQLException {
         String sqlStatement = "SELECT * FROM `DiaCrypt`.`UserDiary` WHERE UserID = ?;";
@@ -41,7 +55,7 @@ public abstract class DbContextMethods implements IDbContext {
 
             ResultSet rs = prepStatement.executeQuery();
 
-            List<UserDiary> userDiarys = new ArrayList<UserDiary>();
+            List<UserDiary> userDiarys = new ArrayList<>();
             UserDiary ud = new UserDiary();
             while (rs.next()) {
                 ud.UserID = rs.getInt("UserID");
@@ -84,7 +98,7 @@ public abstract class DbContextMethods implements IDbContext {
 
             ResultSet rs = prepStatement.executeQuery();
 
-            List<DiaryPage> diaryPages = new ArrayList<DiaryPage>();
+            List<DiaryPage> diaryPages = new ArrayList<>();
 
             DiaryPage dp = new DiaryPage();
             while (rs.next()) {

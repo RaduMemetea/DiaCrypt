@@ -14,6 +14,8 @@ public interface IDbContext {
 
     Integer GetUserID(String username, String password) throws SQLException;
 
+    String GetUserSalt(String username) throws SQLException;
+
     List<UserDiary> GetUserDiary(Integer userID) throws SQLException;
 
     Diary GetDiary(Integer diaryID) throws SQLException; // Returns all entries that make a diary(all page ID's) for a user

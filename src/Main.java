@@ -1,5 +1,5 @@
-import DatabaseContext.MariaDbContext;
-import UserInterface.ConsoleUserInterface;
+import DatabaseContext.*;
+import UserInterface.*;
 
 import java.sql.SQLException;
 
@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {// it's required that arg0 is the database connection username and arg1 is the password
 
         try {
-            MariaDbContext.CreateDbInstance(args[0], args[1]); //Initialize the database driver, instance and connection.
+            MariaDbContext.createInstance(args[0], args[1]); //Initialize the database driver, instance and connection.
         } catch (SQLException throwables) {
             System.err.println("The attempt to initialize database connection failed!...");
             throwables.printStackTrace();
@@ -18,8 +18,17 @@ public class Main {
         }
 
 
-        new ConsoleUserInterface();
+        guiHandler gui = new guiHandler();
 
+        //encrypt each diary and page with a password uniquely generated for each user
+
+        // new ConsoleUserInterface();
+//
+//        try {
+//            System.out.println(MariaDbContext.getInstance().GetUserSalt("Kity"));
+//        } catch (SQLException throwables) {
+//            throwables.printStackTrace();
+//        }
 
     }
 }

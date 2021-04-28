@@ -1,24 +1,14 @@
-package UserInterface;
-
-import DataModels.Complex.FullDiary;
-import DataModels.Diary;
+import DataModels.Complex.*;
+import DataModels.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AuthUser {
+public class AuthUser extends User {
 
     private static AuthUser instance = null;
 
-    private final Integer ID;
-    private final String Username;
     private List<Diary> Diaries; // All diaries data(excluding contents) that belong to thew current user
-    private FullDiary Diary;
-
-    private AuthUser(Integer id, String username) {
-        ID = id;
-        Username = username;
-    }
 
     public static AuthUser getInstance() {
         if (instance == null)
@@ -26,14 +16,23 @@ public class AuthUser {
         return instance;
     }
 
-    public static Boolean CreateAuthUserInstance(Integer id, String username) {
-        if (id < 0 && username == null) return false;
-        instance = new AuthUser(id, username);
+    private FullDiary Diary;
+
+
+    private AuthUser(User user) {
+        ID = user.ID;
+        Username = user.Username;
+        Password = user.Password;
+        Salt = user.Salt;
+    }
+
+    public static Boolean createInstance(User user) {
+        if (user.ID < 0 || user.Username == null || user.Salt == null) return false;
+        instance = new AuthUser(user);
         return true;
     }
 
-
-    public Boolean AddDiary(Diary diary) {
+    public Boolean addDiary(Diary diary) {
 
         if (diary == null || diary.ID < 1 || diary.Title == null)
             return false;

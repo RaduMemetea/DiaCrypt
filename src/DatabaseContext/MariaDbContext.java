@@ -10,7 +10,7 @@ public class MariaDbContext extends DbContextMethods {
     private static MariaDbContext instance = null;
 
     static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-    static final String DB_URL = "jdbc:mariadb://192.168.10.2:3307/DiaCrypt";
+    static final String DB_URL = "jdbc:mariadb://192.168.10.2:3307/DiaCrypt?useTLS=true&trustServerCertificate=true";//TLS 1.2
     private final String USER;
     private final String PASS;
 
@@ -26,7 +26,7 @@ public class MariaDbContext extends DbContextMethods {
         return instance;
     }
 
-    public static void CreateDbInstance(String uname, String pass) throws SQLException, ClassNotFoundException {
+    public static void createInstance(String uname, String pass) throws SQLException, ClassNotFoundException {
         if (instance != null) instance.Close();
 
         instance = new MariaDbContext(uname, pass);
