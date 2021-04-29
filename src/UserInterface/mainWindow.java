@@ -7,5 +7,7 @@ public class mainWindow {
     public JTree diariesTree;
     private JButton logOutButton;
     private JButton saveButton;
-    private JTextPane textPane1;
+    private JTextPane pageTextPane;
+    private JButton cancelButton;
+    private JButton addDiary;
 }

@@ -12,32 +12,9 @@
     </properties>
     <border type="none"/>
     <children>
-      <scrollpane id="68a34">
-        <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="7d2aa" class="javax.swing.JTextPane" binding="textPane1" default-binding="true">
-            <constraints/>
-            <properties/>
-          </component>
-        </children>
-      </scrollpane>
-      <component id="285bb" class="javax.swing.JTree" binding="diariesTree">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-            <preferred-size width="50" height="-1"/>
-          </grid>
-        </constraints>
-        <properties>
-          <dragEnabled value="false"/>
-        </properties>
-      </component>
       <toolbar id="94aaa">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="-1" height="20"/>
           </grid>
         </constraints>
@@ -46,6 +23,38 @@
         </properties>
         <border type="none"/>
         <children>
+          <component id="90315" class="javax.swing.JButton" binding="addDiary">
+            <constraints/>
+            <properties>
+              <text value="Add diary"/>
+            </properties>
+          </component>
+          <hspacer id="214f1">
+            <constraints/>
+          </hspacer>
+          <component id="3f4c9" class="javax.swing.JButton" binding="logOutButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <horizontalAlignment value="0"/>
+              <text value="Log Out"/>
+            </properties>
+          </component>
+        </children>
+      </toolbar>
+      <toolbar id="ca996">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="-1" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <floatable value="false"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <hspacer id="1ac14">
+            <constraints/>
+          </hspacer>
           <component id="36f3c" class="javax.swing.JButton" binding="saveButton">
             <constraints/>
             <properties>
@@ -53,14 +62,47 @@
               <toolTipText value="Save changes made to the curent page."/>
             </properties>
           </component>
-          <component id="3f4c9" class="javax.swing.JButton" binding="logOutButton" default-binding="true">
+          <component id="b025d" class="javax.swing.JButton" binding="cancelButton">
             <constraints/>
             <properties>
-              <text value="Log Out"/>
+              <text value="Cancel"/>
+              <toolTipText value=""/>
             </properties>
           </component>
         </children>
       </toolbar>
+      <splitpane id="1d674">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <dividerLocation value="100"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="285bb" class="javax.swing.JTree" binding="diariesTree">
+            <constraints>
+              <splitpane position="left"/>
+            </constraints>
+            <properties>
+              <dragEnabled value="false"/>
+            </properties>
+          </component>
+          <scrollpane id="68a34">
+            <constraints>
+              <splitpane position="right"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="7d2aa" class="javax.swing.JTextPane" binding="pageTextPane">
+                <constraints/>
+                <properties/>
+              </component>
+            </children>
+          </scrollpane>
+        </children>
+      </splitpane>
     </children>
   </grid>
 </form>

@@ -17,8 +17,7 @@ public class Main {
             e.printStackTrace();
         }
 
-
-        guiHandler gui = new guiHandler();
+        guiHandler.getInstance();
 
         //encrypt each diary and page with a password uniquely generated for each user
 

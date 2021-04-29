@@ -1,3 +1,5 @@
+package global;
+
 import DataModels.Complex.*;
 import DataModels.*;
 
@@ -9,15 +11,7 @@ public class AuthUser extends User {
     private static AuthUser instance = null;
 
     private List<Diary> Diaries; // All diaries data(excluding contents) that belong to thew current user
-
-    public static AuthUser getInstance() {
-        if (instance == null)
-            return null;
-        return instance;
-    }
-
     private FullDiary Diary;
-
 
     private AuthUser(User user) {
         ID = user.ID;
@@ -26,13 +20,28 @@ public class AuthUser extends User {
         Salt = user.Salt;
     }
 
-    public static Boolean createInstance(User user) {
+    public static AuthUser getInstance() {
+        if (instance == null)
+            return null;
+        return instance;
+    }
+
+    public static void DestroyInstance() {
+        instance.ID = 0;
+        instance.Username = null;
+        instance.Password = null;
+        instance.Salt = null;
+        instance = null;
+    }
+
+    public static boolean createInstance(User user) {
         if (user.ID < 0 || user.Username == null || user.Salt == null) return false;
+        if (instance != null) DestroyInstance();
         instance = new AuthUser(user);
         return true;
     }
 
-    public Boolean addDiary(Diary diary) {
+    public boolean addDiary(Diary diary) {
 
         if (diary == null || diary.ID < 1 || diary.Title == null)
             return false;
