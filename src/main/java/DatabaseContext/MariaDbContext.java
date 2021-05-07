@@ -2,7 +2,7 @@ package DatabaseContext;
 
 import java.sql.*;
 
-public class MariaDbContext extends DbContextMethods {
+public class MariaDbContext extends SqlDbContextMethods {
     private static MariaDbContext instance = null;
 
     static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";

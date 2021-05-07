@@ -29,6 +29,12 @@
               <text value="Add diary"/>
             </properties>
           </component>
+          <component id="ed3c3" class="javax.swing.JButton" binding="addPageButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="Add Page"/>
+            </properties>
+          </component>
           <hspacer id="214f1">
             <constraints/>
           </hspacer>
@@ -80,14 +86,21 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="285bb" class="javax.swing.JTree" binding="diariesTree">
+          <scrollpane id="f7e63">
             <constraints>
               <splitpane position="left"/>
             </constraints>
-            <properties>
-              <dragEnabled value="false"/>
-            </properties>
-          </component>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="285bb" class="javax.swing.JTree" binding="diariesTree">
+                <constraints/>
+                <properties>
+                  <dragEnabled value="false"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
           <scrollpane id="68a34">
             <constraints>
               <splitpane position="right"/>

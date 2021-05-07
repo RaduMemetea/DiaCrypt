@@ -10,30 +10,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class DbContextMethods implements IDbContext {
+public abstract class SqlDbContextMethods implements IDbContext {
 
     Connection conn;
 
 
     //Get Base
 
-    public Integer GetUserID(String username, String password) throws SQLException {
-        String sqlStatement = "SELECT * FROM `DiaCrypt`.`User` WHERE Username = ? AND Password = ?;";
-
-        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
-            prepStatement.setString(1, username);
-            prepStatement.setString(2, password);
-
-            ResultSet rs = prepStatement.executeQuery();
-
-            rs.next();
-            return rs.getInt("ID");
-
-        }
-    }
-
-    public String GetUserSalt(String username) throws SQLException {
-        String sqlStatement = "SELECT `User`.`Salt` FROM `DiaCrypt`.`User` WHERE Username = ?;";
+    public User GetUser(String username) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`User` WHERE Username = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setString(1, username);
@@ -41,7 +26,13 @@ public abstract class DbContextMethods implements IDbContext {
             ResultSet rs = prepStatement.executeQuery();
 
             rs.next();
-            return rs.getString("Salt");
+            User u = new User();
+
+            u.ID = rs.getInt("ID");
+            u.Username = rs.getString("Username");
+            u.Password = rs.getString("Password");
+
+            return u;
 
         }
     }
@@ -176,13 +167,12 @@ public abstract class DbContextMethods implements IDbContext {
 
     public Integer PostUser(User user) throws SQLException {
 
-        String sqlStatement = "INSERT INTO `DiaCrypt`.`User`(`ID`,`Username`,`Password`,`Salt`) VALUES(?, ?, ?, ?);";
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`User`(`ID`,`Username`,`Password`) VALUES(?, ?, ?);";
 
         try (PreparedStatement postUser = conn.prepareStatement(sqlStatement)) {
             postUser.setInt(1, 0);
             postUser.setString(2, user.Username);
             postUser.setString(3, user.Password);
-            postUser.setString(4, user.Salt);
 
             return postUser.executeUpdate();
         }
@@ -242,13 +232,12 @@ public abstract class DbContextMethods implements IDbContext {
     //Put
 
     public Integer PutUser(User user) throws SQLException {
-        String sqlStatement = "UPDATE `DiaCrypt`.`User` SET `Username` = ?, `Password` = ?, `Salt` = ? WHERE `ID` = ?;";
+        String sqlStatement = "UPDATE `DiaCrypt`.`User` SET `Username` = ?, `Password` = ? WHERE `ID` = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setString(1, user.Username);
             prepStatement.setString(2, user.Password);
-            prepStatement.setString(3, user.Salt);
-            prepStatement.setInt(4, user.ID);
+            prepStatement.setInt(3, user.ID);
 
             return prepStatement.executeUpdate();
         }
