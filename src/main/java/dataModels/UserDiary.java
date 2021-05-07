@@ -1,4 +1,4 @@
-package DataModels;
+package dataModels;
 
 public class UserDiary {
     public Integer UserID;

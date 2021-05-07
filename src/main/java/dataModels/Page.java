@@ -1,4 +1,4 @@
-package DataModels;
+package dataModels;
 
 public class Page implements Comparable<Page> {
     public Integer ID;

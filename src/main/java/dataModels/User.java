@@ -1,4 +1,4 @@
-package DataModels;
+package dataModels;
 
 public class User {
     public Integer ID;

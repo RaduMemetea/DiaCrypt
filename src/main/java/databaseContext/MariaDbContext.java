@@ -1,4 +1,4 @@
-package DatabaseContext;
+package databaseContext;
 
 import java.sql.*;
 

@@ -1,11 +1,10 @@
 package global;
 
-import DataModels.User;
-import DatabaseContext.MariaDbContext;
+import dataModels.User;
+import databaseContext.MariaDbContext;
 import de.mkammerer.argon2.*;
 
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.Base64;
 
 public class SecurityHandler {
@@ -37,7 +36,7 @@ public class SecurityHandler {
     }
 
     public static boolean validateUsername(String username) {
-        //todo check for existance
+        //todo check for existence
         return true;
     }
 

@@ -1,4 +1,4 @@
-package DataModels;
+package dataModels;
 
 public class DiaryPage {
     public Integer DiaryID;

@@ -1,5 +1,5 @@
-import DatabaseContext.*;
-import UserInterface.*;
+import databaseContext.*;
+import userInterface.*;
 
 import java.sql.SQLException;
 

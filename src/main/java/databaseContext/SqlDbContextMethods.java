@@ -1,7 +1,7 @@
-package DatabaseContext;
+package databaseContext;
 
-import DataModels.*;
-import DataModels.Complex.*;
+import dataModels.*;
+import dataModels.complex.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,15 +46,15 @@ public abstract class SqlDbContextMethods implements IDbContext {
 
             ResultSet rs = prepStatement.executeQuery();
 
-            List<UserDiary> userDiarys = new ArrayList<>();
+            List<UserDiary> userDiaries = new ArrayList<>();
             UserDiary ud = new UserDiary();
             while (rs.next()) {
                 ud.UserID = rs.getInt("UserID");
                 ud.DiaryID = rs.getInt("DiaryID");
-                userDiarys.add(ud);
+                userDiaries.add(ud);
             }
 
-            return userDiarys;
+            return userDiaries;
         }
     }
 

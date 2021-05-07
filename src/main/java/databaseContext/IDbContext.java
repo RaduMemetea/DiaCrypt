@@ -1,7 +1,7 @@
-package DatabaseContext;
+package databaseContext;
 
-import DataModels.*;
-import DataModels.Complex.FullDiary;
+import dataModels.*;
+import dataModels.complex.FullDiary;
 
 import java.sql.SQLException;
 import java.util.List;

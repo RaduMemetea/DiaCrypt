@@ -1,4 +1,4 @@
-package DataModels;
+package dataModels;
 
 import java.sql.Timestamp;
 

@@ -1,9 +1,8 @@
-package DataModels.Complex;
+package dataModels.complex;
 
-import DataModels.Diary;
-import DataModels.Page;
+import dataModels.Diary;
+import dataModels.Page;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class FullDiary extends Diary implements Comparable<FullDiary> {
