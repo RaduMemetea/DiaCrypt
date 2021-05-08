@@ -1,6 +1,6 @@
 package global;
 
-import dataModels.User;
+import dataModels.*;
 import databaseContext.MariaDbContext;
 import de.mkammerer.argon2.*;
 
@@ -68,10 +68,45 @@ public class SecurityHandler {
         u.Username = username;
         u.Password = Argon2Generate(password1);
 
-        return MariaDbContext.getInstance().PostUser(u) == 1;
+        return MariaDbContext.getInstance().PostUser(u) > 0;
     }
 
     public static void LogOut() {
         AuthUser.DestroyInstance();
     }
+
+    public static Integer addDiary(String title) throws Exception {
+        if (title.length() < 3) throw new Exception("Invalid diary title!");
+
+        var dia = new Diary();
+        dia.Title = title;
+
+        var diaryID = MariaDbContext.getInstance().PostDiary(dia);
+
+        var ud = new UserDiary();
+        ud.DiaryID = diaryID;
+        ud.UserID = AuthUser.getInstance().ID;
+
+        MariaDbContext.getInstance().PostUserDiary(ud);
+
+        return diaryID;
+    }
+
+    public static Integer addPage(Page page, Integer diaryID) throws Exception {
+        if (page.Number < 1) throw new Exception("Invalid page number!");
+        if (diaryID < 1) throw new Exception("Invalid diary id!");
+
+
+        var pageID = MariaDbContext.getInstance().PostPage(page);
+
+        var dp = new DiaryPage();
+        dp.DiaryID = diaryID;
+        dp.PageID = pageID;
+
+        MariaDbContext.getInstance().PostDiaryPage(dp);
+
+        return pageID;
+    }
+
+
 }

@@ -17,8 +17,16 @@ public class MariaDbContext extends SqlDbContextMethods {
     }
 
     public static MariaDbContext getInstance() {
-        if (instance == null)
-            return null;
+        if (instance == null) {
+            try {
+                createInstance("", "");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
         return instance;
     }
 

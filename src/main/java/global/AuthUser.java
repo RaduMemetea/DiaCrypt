@@ -92,8 +92,8 @@ public class AuthUser extends User {
     }
 
 
-    public void addChange(Object content) {
-        if (content == null) return;
+    public void addChange(Object content) throws Exception {
+        if (content == null) throw new Exception("Invalid content");
         contentChanges.add(content);
     }
 }

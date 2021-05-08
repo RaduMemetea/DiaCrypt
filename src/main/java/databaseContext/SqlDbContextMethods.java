@@ -3,11 +3,9 @@ package databaseContext;
 import dataModels.*;
 import dataModels.complex.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public abstract class SqlDbContextMethods implements IDbContext {
@@ -38,7 +36,7 @@ public abstract class SqlDbContextMethods implements IDbContext {
     }
 
 
-    public List<UserDiary> GetUserDiary(Integer userID) throws SQLException {
+    public List<UserDiary> GetUserDiariesLink(Integer userID) throws SQLException {
         String sqlStatement = "SELECT * FROM `DiaCrypt`.`UserDiary` WHERE UserID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
@@ -81,7 +79,7 @@ public abstract class SqlDbContextMethods implements IDbContext {
     }
 
 
-    public List<DiaryPage> GetDiaryPage(Integer diaryID) throws SQLException {
+    public List<DiaryPage> GetDiaryPages(Integer diaryID) throws SQLException {
         String sqlStatement = "SELECT * FROM `DiaCrypt`.`DiaryPage` WHERE DiaryID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
@@ -130,21 +128,6 @@ public abstract class SqlDbContextMethods implements IDbContext {
     //Get
 
 
-    public List<Diary> GetUserDiaries(Integer userID) throws SQLException {
-
-        List<UserDiary> udLinks = GetUserDiary(userID);
-
-        List<Diary> userDiaries = new ArrayList<>();
-
-        for (UserDiary u : udLinks) {
-            var diary = GetDiary(u.DiaryID);
-            userDiaries.add(diary);
-        }
-
-        return userDiaries;
-
-    }
-
     public FullDiary GetFullDiary(Integer diaryID) throws SQLException {
         FullDiary fullDiary = new FullDiary();
 
@@ -153,7 +136,7 @@ public abstract class SqlDbContextMethods implements IDbContext {
         fullDiary.Title = diary.Title;
         fullDiary.CreationDate = diary.CreationDate;
 
-        List<DiaryPage> dpLinks = GetDiaryPage(fullDiary.ID);
+        List<DiaryPage> dpLinks = GetDiaryPages(fullDiary.ID);
 
         for (DiaryPage dp : dpLinks) {
             var page = GetPage(dp.PageID);
@@ -169,24 +152,34 @@ public abstract class SqlDbContextMethods implements IDbContext {
 
         String sqlStatement = "INSERT INTO `DiaCrypt`.`User`(`ID`,`Username`,`Password`) VALUES(?, ?, ?);";
 
-        try (PreparedStatement postUser = conn.prepareStatement(sqlStatement)) {
-            postUser.setInt(1, 0);
-            postUser.setString(2, user.Username);
-            postUser.setString(3, user.Password);
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS)) {
+            prepStatement.setInt(1, 0);
+            prepStatement.setString(2, user.Username);
+            prepStatement.setString(3, user.Password);
 
-            return postUser.executeUpdate();
+            if (prepStatement.executeUpdate() == 0)
+                throw new SQLException("User insert was unsuccessful.");
+
+            try (ResultSet rs = prepStatement.getGeneratedKeys()) {
+                if (rs.next())
+                    return rs.getInt(1);
+                throw new SQLException("User insert failed, no ID obtained.");
+            }
+
         }
     }
 
 
-    public Integer PostUserDiary(UserDiary userDiary) throws SQLException {
+    public void PostUserDiary(UserDiary userDiary) throws SQLException {
         String sqlStatement = "INSERT INTO `DiaCrypt`.`UserDiary`(`DiaryID`,`UserID`) VALUES(?,?);";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, userDiary.DiaryID);
             prepStatement.setInt(2, userDiary.UserID);
 
-            return prepStatement.executeUpdate();
+            if (prepStatement.executeUpdate() == 0)
+                throw new SQLException("UserDiary insert was unsuccessful.");
+
         }
     }
 
@@ -194,24 +187,33 @@ public abstract class SqlDbContextMethods implements IDbContext {
     public Integer PostDiary(Diary diary) throws SQLException {
         String sqlStatement = "INSERT INTO `DiaCrypt`.`Diary`(`ID`,`Title`,`CreationDate`) VALUES(?,?,?);";
 
-        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS)) {
             prepStatement.setInt(1, 0);
             prepStatement.setString(2, diary.Title);
-            prepStatement.setTimestamp(3, diary.CreationDate);
+            prepStatement.setTimestamp(3, new Timestamp(new Date().getTime()));
 
-            return prepStatement.executeUpdate();
+            if (prepStatement.executeUpdate() == 0)
+                throw new SQLException("Diary insert was unsuccessful.");
+
+            try (ResultSet rs = prepStatement.getGeneratedKeys()) {
+                if (rs.next())
+                    return rs.getInt(1);
+                throw new SQLException("Diary insert failed, no ID obtained.");
+            }
         }
     }
 
 
-    public Integer PostDiaryPage(DiaryPage diaryPage) throws SQLException {
+    public void PostDiaryPage(DiaryPage diaryPage) throws SQLException {
         String sqlStatement = "INSERT INTO `DiaCrypt`.`DiaryPage`(`DiaryID`,`PageID`) VALUES(?,?);";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, diaryPage.DiaryID);
             prepStatement.setInt(2, diaryPage.PageID);
 
-            return prepStatement.executeUpdate();
+            if (prepStatement.executeUpdate() == 0)
+                throw new SQLException("DiaryPage insert was unsuccessful.");
+
         }
     }
 
@@ -219,19 +221,26 @@ public abstract class SqlDbContextMethods implements IDbContext {
     public Integer PostPage(Page page) throws SQLException {
         String sqlStatement = "INSERT INTO `DiaCrypt`.`Page`(`ID`,`Number`,`Text`) VALUES(?,?,?);";
 
-        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS)) {
             prepStatement.setInt(1, 0);
             prepStatement.setInt(2, page.Number);
             prepStatement.setString(3, page.Text);
 
-            return prepStatement.executeUpdate();
+            if (prepStatement.executeUpdate() == 0)
+                throw new SQLException("Page insert was unsuccessful.");
+
+            try (ResultSet rs = prepStatement.getGeneratedKeys()) {
+                if (rs.next())
+                    return rs.getInt(1);
+                throw new SQLException("Page insert failed, no ID obtained.");
+            }
         }
     }
 
 
     //Put
 
-    public Integer PutUser(User user) throws SQLException {
+    public boolean PutUser(User user) throws SQLException {
         String sqlStatement = "UPDATE `DiaCrypt`.`User` SET `Username` = ?, `Password` = ? WHERE `ID` = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
@@ -239,12 +248,12 @@ public abstract class SqlDbContextMethods implements IDbContext {
             prepStatement.setString(2, user.Password);
             prepStatement.setInt(3, user.ID);
 
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
-    public Integer PutDiary(Diary diary) throws SQLException {
+    public boolean PutDiary(Diary diary) throws SQLException {
         String sqlStatement = "UPDATE `DiaCrypt`.`Diary` SET `Title` = ?, `CreationDate` = ? WHERE `ID` = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
@@ -252,12 +261,12 @@ public abstract class SqlDbContextMethods implements IDbContext {
             prepStatement.setTimestamp(2, diary.CreationDate);
             prepStatement.setInt(3, diary.ID);
 
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
-    public Integer PutPage(Page page) throws SQLException {
+    public boolean PutPage(Page page) throws SQLException {
         String sqlStatement = "UPDATE `DiaCrypt`.`Page` SET `Number` = ?, `Text` = ? WHERE `ID` = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
@@ -265,61 +274,61 @@ public abstract class SqlDbContextMethods implements IDbContext {
             prepStatement.setString(2, page.Text);
             prepStatement.setInt(3, page.ID);
 
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
     //Delete
 
-    public Integer DeleteUser(Integer userID) throws SQLException {
+    public boolean DeleteUser(Integer userID) throws SQLException {
         String sqlStatement = "DELETE FROM `DiaCrypt`.`User`WHERE ID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, userID);
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
-    public Integer DeleteUserDiary(Integer userID, Integer diaryID) throws SQLException {
+    public boolean DeleteUserDiary(Integer userID, Integer diaryID) throws SQLException {
         String sqlStatement = "DELETE FROM `DiaCrypt`.`UserDiary`WHERE UserID = ? AND DiaryID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, userID);
             prepStatement.setInt(2, diaryID);
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
-    public Integer DeleteDiary(Integer diaryID) throws SQLException {
+    public boolean DeleteDiary(Integer diaryID) throws SQLException {
         String sqlStatement = "DELETE FROM `DiaCrypt`.`Diary`WHERE ID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, diaryID);
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
-    public Integer DeleteDiaryPage(Integer diaryID, Integer pageID) throws SQLException {
+    public boolean DeleteDiaryPage(Integer diaryID, Integer pageID) throws SQLException {
         String sqlStatement = "DELETE FROM `DiaCrypt`.`DiaryPage`WHERE DiaryID = ? AND PageID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, diaryID);
             prepStatement.setInt(2, pageID);
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 
 
-    public Integer DeletePage(Integer pageID) throws SQLException {
+    public boolean DeletePage(Integer pageID) throws SQLException {
         String sqlStatement = "DELETE FROM `DiaCrypt`.`Page`WHERE ID = ?;";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, pageID);
-            return prepStatement.executeUpdate();
+            return prepStatement.executeUpdate() == 1;
         }
     }
 }
