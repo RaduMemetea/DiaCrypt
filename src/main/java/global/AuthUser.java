@@ -37,7 +37,7 @@ public class AuthUser extends User {
     }
 
 
-    public static void SetUser(User user) throws Exception {
+    public void SetUser(User user) throws Exception {
         if (user.ID < 0 || user.Username == null) throw new Exception("Invalid User!");
 
         if (instance != null) DestroyInstance();
@@ -50,6 +50,11 @@ public class AuthUser extends User {
 
     }
 
+    public void SetDiaries(List<FullDiary> diaries) throws Exception {
+        if (instance == null) throw new Exception("No User Authenticated!");
+
+        instance.Diaries = diaries;
+    }
 
     public void addDiary(FullDiary diary) throws Exception {
 
@@ -76,10 +81,12 @@ public class AuthUser extends User {
                 DefaultMutableTreeNode diaryNode = new DefaultMutableTreeNode(diary);
                 root.add(diaryNode);
 
-                Collections.sort(diary.Pages);
-                for (Page page : diary.Pages) {
-                    DefaultMutableTreeNode pageNode = new DefaultMutableTreeNode(page, false);
-                    diaryNode.add(pageNode);
+                if (diary.Pages != null) {
+                    Collections.sort(diary.Pages);
+                    for (Page page : diary.Pages) {
+                        DefaultMutableTreeNode pageNode = new DefaultMutableTreeNode(page, false);
+                        diaryNode.add(pageNode);
+                    }
                 }
             }
 

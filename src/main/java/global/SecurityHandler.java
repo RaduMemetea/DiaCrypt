@@ -56,7 +56,12 @@ public class SecurityHandler {
         var okPass = Argon2Verify(password, user.Password);
         if (!okPass) throw new Exception("Incorrect username or password!");
 
-        AuthUser.SetUser(user);
+        AuthUser.getInstance().SetUser(user);
+        AuthUser.getInstance().SetDiaries(
+                MariaDbContext.getInstance().GetUserDiaries(
+                        AuthUser.getInstance().ID
+                )
+        );
     }
 
     public static boolean createUser(String username, char[] password1, char[] password2) throws Exception {
@@ -89,23 +94,28 @@ public class SecurityHandler {
 
         MariaDbContext.getInstance().PostUserDiary(ud);
 
+        addPage("", diaryID);
+
         return diaryID;
     }
 
-    public static Integer addPage(Page page, Integer diaryID) throws Exception {
-        if (page.Number < 1) throw new Exception("Invalid page number!");
+    public static Page addPage(String pageText, Integer diaryID) throws Exception {
+        if (pageText == null) throw new Exception("Invalid page text!");
         if (diaryID < 1) throw new Exception("Invalid diary id!");
 
+        var page = new Page();
+        page.Text = pageText;
+        page.Number = MariaDbContext.getInstance().GetDiaryPages(diaryID).size() + 1;
 
-        var pageID = MariaDbContext.getInstance().PostPage(page);
+        page.ID = MariaDbContext.getInstance().PostPage(page);
 
         var dp = new DiaryPage();
         dp.DiaryID = diaryID;
-        dp.PageID = pageID;
+        dp.PageID = page.ID;
 
         MariaDbContext.getInstance().PostDiaryPage(dp);
 
-        return pageID;
+        return page;
     }
 
 

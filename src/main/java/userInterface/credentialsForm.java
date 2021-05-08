@@ -36,7 +36,10 @@ public class credentialsForm {
                 try {
                     SecurityHandler.createUserSession(usernameField.getText(), passwordField.getPassword());
                 } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(new JFrame(), "");
+                    System.err.println(exception.getMessage());
 
+                    exception.printStackTrace();
                     ///TODO show an error message with the e.getMessage() using the guiHandler error message method
                     return;
                 }
@@ -46,6 +49,7 @@ public class credentialsForm {
                 try {
                     SecurityHandler.createUser(usernameField.getText(), passwordField.getPassword(), passwordField2.getPassword());
                 } catch (Exception exception) {
+                    exception.printStackTrace();
 
                     ///TODO show an error message with the e.getMessage() using the guiHandler error message method
                     return;

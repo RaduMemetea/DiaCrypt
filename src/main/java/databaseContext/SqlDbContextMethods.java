@@ -45,8 +45,8 @@ public abstract class SqlDbContextMethods implements IDbContext {
             ResultSet rs = prepStatement.executeQuery();
 
             List<UserDiary> userDiaries = new ArrayList<>();
-            UserDiary ud = new UserDiary();
             while (rs.next()) {
+                UserDiary ud = new UserDiary();
                 ud.UserID = rs.getInt("UserID");
                 ud.DiaryID = rs.getInt("DiaryID");
                 userDiaries.add(ud);
@@ -89,8 +89,8 @@ public abstract class SqlDbContextMethods implements IDbContext {
 
             List<DiaryPage> diaryPages = new ArrayList<>();
 
-            DiaryPage dp = new DiaryPage();
             while (rs.next()) {
+                DiaryPage dp = new DiaryPage();
 
                 dp.DiaryID = rs.getInt("DiaryID");
                 dp.PageID = rs.getInt("PageID");
@@ -138,11 +138,23 @@ public abstract class SqlDbContextMethods implements IDbContext {
 
         List<DiaryPage> dpLinks = GetDiaryPages(fullDiary.ID);
 
-        for (DiaryPage dp : dpLinks) {
-            var page = GetPage(dp.PageID);
-            fullDiary.Pages.add(page);
+        if (dpLinks != null) {
+            fullDiary.Pages = new ArrayList<>();
+            for (DiaryPage dp : dpLinks) {
+                fullDiary.Pages.add(GetPage(dp.PageID));
+            }
         }
         return fullDiary;
+    }
+
+    public List<FullDiary> GetUserDiaries(Integer userID) throws SQLException {
+        var diaries = GetUserDiariesLink(userID);
+        List<FullDiary> fullDiaries = new ArrayList<>();
+
+        for (var diary : diaries)
+            fullDiaries.add(GetFullDiary(diary.DiaryID));
+
+        return fullDiaries;
     }
 
 

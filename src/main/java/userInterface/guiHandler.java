@@ -30,8 +30,4 @@ public final class guiHandler {
         frame.pack();
     }
 
-    public boolean getConfirmation(String message) {
-        return true;//TODO implement
-
-    }
 }
