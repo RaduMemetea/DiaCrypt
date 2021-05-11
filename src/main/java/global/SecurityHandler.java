@@ -1,10 +1,12 @@
 package global;
 
 import dataModels.*;
+import dataModels.complex.FullDiary;
 import databaseContext.MariaDbContext;
 import de.mkammerer.argon2.*;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Base64;
 
 public class SecurityHandler {
@@ -26,7 +28,6 @@ public class SecurityHandler {
         return argon2.verify(Base64Decode(hash), pass);
     }
 
-
     public static String Base64Encode(String text) {
         return Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
     }
@@ -35,12 +36,13 @@ public class SecurityHandler {
         return new String(Base64.getDecoder().decode(text));
     }
 
+
     public static boolean validateUsername(String username) {
         //todo check for existence
         return true;
     }
 
-    public static boolean validatePassword(char[] password) {
+    public static boolean validatePassword(String username, char[] password) {
         return true;
     }
 
@@ -48,66 +50,64 @@ public class SecurityHandler {
         return true;
     }
 
+
     public static void createUserSession(String username, char[] password) throws Exception {
         validateUsername(username);
-        validatePassword(password);
+        validatePassword(username, password);
 
         var user = MariaDbContext.getInstance().GetUser(username);
         var okPass = Argon2Verify(password, user.Password);
         if (!okPass) throw new Exception("Incorrect username or password!");
 
         AuthUser.getInstance().SetUser(user);
-        AuthUser.getInstance().SetDiaries(
-                MariaDbContext.getInstance().GetUserDiaries(
-                        AuthUser.getInstance().ID
-                )
-        );
+        AuthUser.getInstance().refreshDiaries();
+
     }
 
-    public static boolean createUser(String username, char[] password1, char[] password2) throws Exception {
+    public static void createUser(String username, char[] password1, char[] password2) throws Exception {
         validateUsername(username);
         validatePassword(password1, password2);
 
         User u = new User();
-        u.ID = 0;
         u.Username = username;
         u.Password = Argon2Generate(password1);
+        u.ID = MariaDbContext.getInstance().PostUser(u).ID;
 
-        return MariaDbContext.getInstance().PostUser(u) > 0;
+        MariaDbContext.getInstance().GetUser(u.ID);
     }
 
     public static void LogOut() {
         AuthUser.DestroyInstance();
     }
 
-    public static Integer addDiary(String title) throws Exception {
-        if (title.length() < 3) throw new Exception("Invalid diary title!");
+    public static Diary addDiary(String title) throws Exception {
+        if (title.length() < 3) throw new Exception("Title to short!");
+        if (title.length() > 1000) throw new Exception("Title to long!");
 
         var dia = new Diary();
         dia.Title = title;
-
-        var diaryID = MariaDbContext.getInstance().PostDiary(dia);
+        dia.ID = MariaDbContext.getInstance().PostDiary(dia).ID;
 
         var ud = new UserDiary();
-        ud.DiaryID = diaryID;
+        ud.DiaryID = dia.ID;
         ud.UserID = AuthUser.getInstance().ID;
 
         MariaDbContext.getInstance().PostUserDiary(ud);
 
-        addPage("", diaryID);
+        addPage("", dia.ID);
 
-        return diaryID;
+        return MariaDbContext.getInstance().GetDiary(dia.ID);
     }
 
     public static Page addPage(String pageText, Integer diaryID) throws Exception {
-        if (pageText == null) throw new Exception("Invalid page text!");
-        if (diaryID < 1) throw new Exception("Invalid diary id!");
+        if (pageText == null) return null;
+
+        MariaDbContext.getInstance().GetDiary(diaryID);
 
         var page = new Page();
         page.Text = pageText;
         page.Number = MariaDbContext.getInstance().GetDiaryPages(diaryID).size() + 1;
-
-        page.ID = MariaDbContext.getInstance().PostPage(page);
+        page.ID = MariaDbContext.getInstance().PostPage(page).ID;
 
         var dp = new DiaryPage();
         dp.DiaryID = diaryID;
@@ -115,8 +115,35 @@ public class SecurityHandler {
 
         MariaDbContext.getInstance().PostDiaryPage(dp);
 
-        return page;
+        return MariaDbContext.getInstance().GetPage(page.ID);
     }
 
 
+    public static void deletePage(Integer id) {
+        if (id < 1) return;
+
+        try {
+            MariaDbContext.getInstance().DeletePage(id);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public static void deleteDiary(Integer id) {
+        if (id < 1) return;
+
+        try {
+            MariaDbContext.getInstance().DeleteDiary(id);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public static void updateDiaryTitle(FullDiary fullDiary) throws SQLException {
+        MariaDbContext.getInstance().PutDiary(fullDiary.getDiary());
+    }
+
+    public static void updatePage(Page page) throws SQLException {
+        MariaDbContext.getInstance().PutPage(page);
+    }
 }

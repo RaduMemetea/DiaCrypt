@@ -4,6 +4,7 @@ import global.SecurityHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class credentialsForm {
     public JPanel mainPanel;
@@ -22,8 +23,8 @@ public class credentialsForm {
         } else {
             submitButton.setText("Register");
             mainPanel.setPreferredSize(new Dimension(250, 180));
-
         }
+
         pass2Label.setEnabled(!formType);
         pass2Label.setVisible(!formType);
         passwordField2.setEnabled(!formType);
@@ -35,12 +36,12 @@ public class credentialsForm {
             if (formType) {
                 try {
                     SecurityHandler.createUserSession(usernameField.getText(), passwordField.getPassword());
-                } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(new JFrame(), "");
-                    System.err.println(exception.getMessage());
-
+                } catch (SQLException exception) {
                     exception.printStackTrace();
-                    ///TODO show an error message with the e.getMessage() using the guiHandler error message method
+                    return;
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
+                    exception.printStackTrace();
                     return;
                 }
                 guiHandler.getInstance().changePanel(new mainWindow().mainPanel);
@@ -48,10 +49,12 @@ public class credentialsForm {
             } else {
                 try {
                     SecurityHandler.createUser(usernameField.getText(), passwordField.getPassword(), passwordField2.getPassword());
-                } catch (Exception exception) {
+                } catch (SQLException exception) {
                     exception.printStackTrace();
-
-                    ///TODO show an error message with the e.getMessage() using the guiHandler error message method
+                    return;
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
+                    exception.printStackTrace();
                     return;
                 }
                 guiHandler.getInstance().changePanel(new startWindow().mainPanel);

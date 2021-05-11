@@ -6,14 +6,9 @@ import global.AuthUser;
 import global.SecurityHandler;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.sql.SQLException;
 
 
 public class mainWindow {
@@ -28,28 +23,26 @@ public class mainWindow {
     private JTextPane pageTextPane;
     private JButton cancelButton;
     private JButton deleteButton;
+
     private Focus addFocus;
     private Focus editFocus;
     private Focus deleteFocus;
-    private Node selectedNode = new Node();
+
+    private final Node selectedNode = new Node();
+    private boolean inPageEdit = false;
 
     public mainWindow() {
 
+        enableDefaultFocus();
         diariesTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-        enableDefaultFocus();
-
-
-        try {
-            diariesTree.setModel(AuthUser.getInstance().createTree());
-        } catch (Exception exception) {
-            System.err.println(exception.getMessage());
-        }
+        diariesTree.setModel(AuthUser.getInstance().getTree());
 
 
         logOutButton.addActionListener(e -> {
             if (JOptionPane.showConfirmDialog(new JFrame(), "Are you sure you want to log out?", "Log Out?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
                 return;
+
             SecurityHandler.LogOut();
             guiHandler.getInstance().changePanel(new startWindow().mainPanel);
         });
@@ -58,130 +51,211 @@ public class mainWindow {
         addButton.addActionListener(e -> {
 
             switch (addFocus) {
+
                 case ROOT -> {
                     var input = JOptionPane.showInputDialog(new JFrame(), "Diary title:");
+
+                    if (input == null || input.equals("")) {
+                        JOptionPane.showMessageDialog(new JFrame(), "Invalid diary title!", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
                     try {
                         SecurityHandler.addDiary(input);
                     } catch (Exception exception) {
+                        JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                         exception.printStackTrace();
+                        return;
                     }
-
-                    //todo update tree
                 }
+
                 case DIARY -> {
 
-                    if (selectedNode.type != Focus.DIARY) {
-                        JOptionPane.showMessageDialog(new JFrame(), "Please select a diary!", "Warning", JOptionPane.WARNING_MESSAGE);
+                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof FullDiary fullDiary))
                         return;
-                    }
+
                     Page newPage;
+
                     try {
-                        newPage = SecurityHandler.addPage("", ((FullDiary) selectedNode.object).ID);
+                        newPage = SecurityHandler.addPage("", (fullDiary.ID));
                     } catch (Exception exception) {
+                        JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                         exception.printStackTrace();
                         return;
                     }
 
-                    setPageEditFocus(true);
-                    guiHandler.getInstance().frame.setTitle("Editing " + ((FullDiary) selectedNode.object).Title + " - page: " + newPage.Number);
-
-                    //todo  update tree
+                    setPageEditFocus();
+                    guiHandler.getInstance().frame.setTitle("Edit: " + (fullDiary.Title + " - page: " + newPage.Number));
 
                 }
 
             }
-
+            updateTree();
 
         });
 
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                switch (editFocus) {
-                    case DIARY -> {
 
-                        //todo prompt to get new diary title, update tree
+        editButton.addActionListener(e -> {
+            switch (editFocus) {
+                case DIARY -> {
 
+                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof FullDiary fullDiary))
+                        return;
+
+                    var input = JOptionPane.showInputDialog(new JFrame(), "New diary title:");
+
+                    if (input == null || input.equals("")) {
+                        JOptionPane.showMessageDialog(new JFrame(), "Invalid diary title!", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        return;
                     }
-                    case PAGE -> {
 
-                        //todo change focus to page content
-
+                    if (input.equals(fullDiary.Title)) {
+                        JOptionPane.showMessageDialog(new JFrame(), "Title not changed!", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        return;
                     }
+
+                    if (input.length() < 3) {
+                        JOptionPane.showMessageDialog(new JFrame(), "Title to short!", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    if (input.length() > 1000) {
+                        JOptionPane.showMessageDialog(new JFrame(), "Title to long!", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    fullDiary.Title = input;
+
+                    try {
+                        SecurityHandler.updateDiaryTitle(fullDiary);
+                    } catch (SQLException exception) {
+                        JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
+                        exception.printStackTrace();
+                    }
+
 
                 }
-            }
-        });
 
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                switch (deleteFocus) {
-                    case DIARY -> {
+                case PAGE -> {
 
-                        //todo get confirmation, delete diary, update tree
+                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof Page page))
+                        return;
 
-                    }
-                    case PAGE -> {
-
-                        //todo get confirmation, delete page, update tree
-
-                    }
+                    setPageEditFocus();
+                    guiHandler.getInstance().frame.setTitle("Edit: " + (((FullDiary) ((DefaultMutableTreeNode) selectedNode.object.getParent()).getUserObject())).Title + " - page: " + page.Number);
 
                 }
+
             }
+            updateTree();
+
+        });
+
+        deleteButton.addActionListener(e -> {
+            switch (deleteFocus) {
+                case DIARY -> {
+
+                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof FullDiary fullDiary))
+                        return;
+
+                    if (JOptionPane.showConfirmDialog(new JFrame(), "Are you sure you want to delete diary " + fullDiary.Title + "?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
+                        return;
+
+                    SecurityHandler.deleteDiary(fullDiary.ID);
+                }
+
+                case PAGE -> {
+
+                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof Page page))
+                        return;
+
+                    if (JOptionPane.showConfirmDialog(new JFrame(), "Are you sure you want to delete page " + page.Number + "?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
+                        return;
+
+                    SecurityHandler.deletePage(page.ID);
+                }
+
+            }
+
+            updateTree();
         });
 
 
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        saveButton.addActionListener(e -> {
 
+            if (!inPageEdit) return;
+
+            if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof Page page)) {
+                JOptionPane.showMessageDialog(new JFrame(), "The page could not be saved!", "Error!", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        });
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+
+            if (pageTextPane.getText().length() >= (2 ^ 16)) {
+                JOptionPane.showMessageDialog(new JFrame(), "The text is to long, you are `" + (pageTextPane.getText().length() - (2 ^ 16) + 1) + "` characters over the limit", "Warning!", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (pageTextPane.getText().equals(page.Text)) {
                 enableDefaultFocus();
-                guiHandler.getInstance().frame.setTitle("DiaCrypt");
-
+                return;
             }
+
+            page.Text = pageTextPane.getText();
+
+            try {
+                SecurityHandler.updatePage(page);
+            } catch (SQLException exception) {
+                JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
+                exception.printStackTrace();
+                return;
+            }
+
+            enableDefaultFocus();
+            guiHandler.getInstance().frame.setTitle("DiaCrypt");
+        });
+
+        cancelButton.addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(new JFrame(), "Are you sure you wanna stop editing?", "Stop edit?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
+                return;
+
+            enableDefaultFocus();
+            guiHandler.getInstance().frame.setTitle("DiaCrypt");
+
         });
 
 
-        diariesTree.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
+        diariesTree.addTreeSelectionListener(e -> {
 
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) diariesTree.getLastSelectedPathComponent();
+            pageTextPane.setText("");
 
-                if (node == null) {
-                    enableDefaultFocus();
-                    selectedNode.type = Focus.NULL;
-                    selectedNode = null;
-                    return;
-                }
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) diariesTree.getLastSelectedPathComponent();
 
-                if (node.isRoot()) {
-                    enableRootFocus();
-                    selectedNode.type = Focus.ROOT;
-                    selectedNode = null;
-                    return;
-                }
-
-                if (node.isLeaf()) {
-                    enablePageFocus();
-                    selectedNode.type = Focus.PAGE;
-                    selectedNode.object = node.getUserObject();
-
-                    return;
-                }
-
-                enableDiaryFocus();
-                selectedNode.type = Focus.DIARY;
-                selectedNode.object = node.getUserObject();
-
+            if (node == null) {
+                enableDefaultFocus();
+                return;
             }
+
+            if (node.isRoot()) {
+                enableRootFocus();
+                return;
+            }
+
+            if (node.isLeaf()) {
+                enablePageFocus();
+                selectedNode.type = Focus.PAGE;
+                selectedNode.object = node;
+
+                if (selectedNode.object.getUserObject() instanceof Page page)
+                    pageTextPane.setText(page.Text);
+
+                return;
+            }
+
+            enableDiaryFocus();
+            selectedNode.type = Focus.DIARY;
+            selectedNode.object = node;
+
+
         });
 
     }
@@ -189,6 +263,8 @@ public class mainWindow {
     private void enableDefaultFocus() {
 
         setButtonsFocus(Focus.NULL);
+        selectedNode.type = Focus.NULL;
+        selectedNode.object = null;
 
         addButton.setEnabled(false);
         addButton.setVisible(false);
@@ -199,30 +275,33 @@ public class mainWindow {
         deleteButton.setEnabled(false);
         deleteButton.setVisible(false);
 
+        saveButton.setEnabled(false);
+        saveButton.setVisible(false);
 
-        setPageEditFocus(false);
+        cancelButton.setEnabled(false);
+        cancelButton.setVisible(false);
+
+        pageTextPane.setEnabled(false);
+
+        diariesTree.setEnabled(true);
+
+        inPageEdit = false;
     }
 
     private void enableRootFocus() {
-
+        enableDefaultFocus();
         setButtonsFocus(Focus.ROOT);
+        selectedNode.type = Focus.ROOT;
+        selectedNode.object = null;
 
         addButton.setEnabled(true);
         addButton.setVisible(true);
         addButton.setText("Add Diary");
 
-        editButton.setEnabled(false);
-        editButton.setVisible(false);
-
-        deleteButton.setEnabled(false);
-        deleteButton.setVisible(false);
-
-
-        setPageEditFocus(false);
     }
 
     private void enableDiaryFocus() {
-
+        enableDefaultFocus();
         setButtonsFocus(Focus.DIARY);
 
         addButton.setEnabled(true);
@@ -238,14 +317,11 @@ public class mainWindow {
         deleteButton.setText("Delete Diary");
 
 
-        setPageEditFocus(false);
     }
 
     private void enablePageFocus() {
+        enableDefaultFocus();
         setButtonsFocus(Focus.PAGE);
-
-        addButton.setEnabled(false);
-        addButton.setVisible(false);
 
         editButton.setEnabled(true);
         editButton.setVisible(true);
@@ -255,20 +331,28 @@ public class mainWindow {
         deleteButton.setVisible(true);
         deleteButton.setText("Delete Page");
 
-        setPageEditFocus(false);
     }
 
-    private void setPageEditFocus(boolean state) {
-        if (state) enableDefaultFocus();
-        saveButton.setEnabled(state);
-        saveButton.setVisible(state);
+    private void setPageEditFocus() {
+        addButton.setEnabled(false);
+        addButton.setVisible(false);
 
-        cancelButton.setEnabled(state);
-        cancelButton.setVisible(state);
+        editButton.setEnabled(false);
+        editButton.setVisible(false);
 
-        pageTextPane.setEnabled(state);
+        deleteButton.setEnabled(false);
+        deleteButton.setVisible(false);
 
-        diariesTree.setEnabled(!state);
+        saveButton.setEnabled(true);
+        saveButton.setVisible(true);
+
+        cancelButton.setEnabled(true);
+        cancelButton.setVisible(true);
+
+        pageTextPane.setEnabled(true);
+
+        diariesTree.setEnabled(false);
+        inPageEdit = true;
     }
 
     private void setButtonsFocus(Focus focus) {
@@ -277,16 +361,21 @@ public class mainWindow {
         deleteFocus = focus;
     }
 
-    enum Focus {
+    private void updateTree() {
+        //todo do this, its important!
+    }
+
+
+    private enum Focus {
         NULL,
         ROOT,
         DIARY,
         PAGE
     }
 
-    class Node {
+    private static class Node {
         public Focus type;
-        public Object object;
+        public DefaultMutableTreeNode object;
     }
 
 }

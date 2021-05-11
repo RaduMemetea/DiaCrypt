@@ -10,4 +10,8 @@ public class Diary {
     public String toString() {
         return Title;
     }
+
+    public Diary getDiary() {
+        return this;
+    }
 }

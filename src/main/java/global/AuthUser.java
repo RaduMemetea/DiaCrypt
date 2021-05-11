@@ -1,11 +1,12 @@
 package global;
 
-import dataModels.complex.*;
-import dataModels.*;
+import dataModels.Page;
+import dataModels.User;
+import dataModels.complex.FullDiary;
+import databaseContext.MariaDbContext;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,8 +17,6 @@ public class AuthUser extends User {
     private List<FullDiary> Diaries;
 
     private DefaultTreeModel tree;
-
-    private List<Object> contentChanges;
 
     private AuthUser() {
     }
@@ -56,21 +55,7 @@ public class AuthUser extends User {
         instance.Diaries = diaries;
     }
 
-    public void addDiary(FullDiary diary) throws Exception {
-
-        if (diary == null || diary.ID < 1 || diary.Title == null)
-            throw new Exception("Invalid diary information's!");
-
-        if (Diaries == null)
-            Diaries = new ArrayList<>();
-
-        Diaries.add(diary);
-
-    }
-
-    public DefaultTreeModel createTree() throws Exception {
-
-        if (instance == null) throw new Exception("No User Authenticated!");
+    public void createTree() {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(Username);
 
@@ -94,13 +79,19 @@ public class AuthUser extends User {
 
         tree = new DefaultTreeModel(root);
 
-        return tree;
-
     }
 
 
-    public void addChange(Object content) throws Exception {
-        if (content == null) throw new Exception("Invalid content");
-        contentChanges.add(content);
+    public void refreshDiaries() {
+        try {
+            SetDiaries(MariaDbContext.getInstance().GetUserDiaries(ID));
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        createTree();
+    }
+
+    public DefaultTreeModel getTree() {
+        return tree;
     }
 }

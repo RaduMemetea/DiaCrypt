@@ -9,41 +9,42 @@ import java.util.List;
 public interface IDbContext {
 
 
-    //Get Base
+    //Get
 
 
     User GetUser(String username) throws SQLException;
 
+    User GetUser(Integer id) throws SQLException;
 
     List<UserDiary> GetUserDiariesLink(Integer userID) throws SQLException;
 
-    Diary GetDiary(Integer diaryID) throws SQLException; // Returns all entries that make a diary(all page ID's) for a user
+    Diary GetDiary(Integer diaryID) throws SQLException;
 
     List<DiaryPage> GetDiaryPages(Integer diaryID) throws SQLException;
 
     Page GetPage(Integer pageID) throws SQLException;
 
-
-    //Get
-
-
     FullDiary GetFullDiary(Integer diaryID) throws SQLException;
+
+    List<FullDiary> GetUserDiaries(Integer userID) throws SQLException;
 
 
     //Post
 
-    Integer PostUser(User user) throws SQLException;
+
+    User PostUser(User user) throws SQLException;
 
     void PostUserDiary(UserDiary userDiary) throws SQLException;
 
-    Integer PostDiary(Diary diary) throws SQLException;
+    Diary PostDiary(Diary diary) throws SQLException;
 
     void PostDiaryPage(DiaryPage diaryPage) throws SQLException;
 
-    Integer PostPage(Page page) throws SQLException;
+    Page PostPage(Page page) throws SQLException;
 
 
     //Put
+
 
     boolean PutUser(User user) throws SQLException;
 
@@ -54,13 +55,10 @@ public interface IDbContext {
 
     //Delete
 
+
     boolean DeleteUser(Integer userID) throws SQLException;
 
-    boolean DeleteUserDiary(Integer userID, Integer diaryID) throws SQLException;
-
     boolean DeleteDiary(Integer diaryID) throws SQLException;
-
-    boolean DeleteDiaryPage(Integer diaryID, Integer pageID) throws SQLException;
 
     boolean DeletePage(Integer pageID) throws SQLException;
 
