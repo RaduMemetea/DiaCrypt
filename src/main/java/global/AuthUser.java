@@ -31,6 +31,7 @@ public class AuthUser extends User {
         instance.ID = 0;
         instance.Username = null;
         instance.Password = null;
+        instance.EncryptionPassword = null;
         instance.Diaries = null;
         instance = null;
     }
@@ -46,11 +47,18 @@ public class AuthUser extends User {
         instance.ID = user.ID;
         instance.Username = user.Username;
         instance.Password = user.Password;
+        instance.EncryptionPassword = user.EncryptionPassword;
 
     }
 
     public void SetDiaries(List<FullDiary> diaries) throws Exception {
         if (instance == null) throw new Exception("No User Authenticated!");
+
+        for (var diary : diaries) {
+            diary.Title = SecurityHandler.aesDecrypt(diary.Title);
+            for (var page : diary.Pages)
+                page.Text = SecurityHandler.aesDecrypt(page.Text);
+        }
 
         instance.Diaries = diaries;
     }

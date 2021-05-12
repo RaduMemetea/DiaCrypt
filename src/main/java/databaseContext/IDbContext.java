@@ -28,6 +28,7 @@ public interface IDbContext {
 
     List<FullDiary> GetUserDiaries(Integer userID) throws SQLException;
 
+    DiaryPage GetPageDiary(Integer pageID) throws SQLException;
 
     //Post
 

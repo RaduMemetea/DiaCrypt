@@ -21,6 +21,5 @@ public class Main {
 
         guiHandler.getInstance();
 
-        //todo encrypt each diary and page with a password uniquely generated for each user
     }
 }

@@ -29,6 +29,7 @@ public abstract class SqlDbContextMethods implements IDbContext {
             u.ID = rs.getInt("ID");
             u.Username = rs.getString("Username");
             u.Password = rs.getString("Password");
+            u.EncryptionPassword = rs.getString("EncryptionPassword");
 
             return u;
 
@@ -50,6 +51,7 @@ public abstract class SqlDbContextMethods implements IDbContext {
             u.ID = rs.getInt("ID");
             u.Username = rs.getString("Username");
             u.Password = rs.getString("Password");
+            u.EncryptionPassword = rs.getString("EncryptionPassword");
 
             return u;
 
@@ -119,6 +121,25 @@ public abstract class SqlDbContextMethods implements IDbContext {
         }
     }
 
+    public DiaryPage GetPageDiary(Integer pageID) throws SQLException {
+        String sqlStatement = "SELECT * FROM `DiaCrypt`.`DiaryPage` WHERE PageID = ?;";
+
+        try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
+            prepStatement.setInt(1, pageID);
+
+            ResultSet rs = prepStatement.executeQuery();
+
+            if (!rs.next()) throw new SQLException("Page does not have a diary!");
+
+            DiaryPage d = new DiaryPage();
+
+            d.DiaryID = rs.getInt("DiaryID");
+            d.PageID = rs.getInt("DiaryID");
+
+            return d;
+        }
+    }
+
     public Page GetPage(Integer pageID) throws SQLException {
         String sqlStatement = "SELECT * FROM `DiaCrypt`.`Page` WHERE ID = ?;";
 
@@ -173,12 +194,13 @@ public abstract class SqlDbContextMethods implements IDbContext {
 
     public User PostUser(User user) throws SQLException {
 
-        String sqlStatement = "INSERT INTO `DiaCrypt`.`User`(`ID`,`Username`,`Password`) VALUES(?, ?, ?);";
+        String sqlStatement = "INSERT INTO `DiaCrypt`.`User`(`ID`,`Username`,`Password`,`EncryptionPassword`) VALUES(?, ?, ?, ?);";
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS)) {
             prepStatement.setInt(1, 0);
             prepStatement.setString(2, user.Username);
             prepStatement.setString(3, user.Password);
+            prepStatement.setString(4, user.EncryptionPassword);
 
             if (prepStatement.executeUpdate() == 0)
                 throw new SQLException("User insert was unsuccessful.");
@@ -276,13 +298,14 @@ public abstract class SqlDbContextMethods implements IDbContext {
     //Put
 
     public boolean PutUser(User user) throws SQLException {
-        String sqlStatement = "UPDATE `DiaCrypt`.`User` SET `Username` = ?, `Password` = ? WHERE `ID` = ?;";
+        String sqlStatement = "UPDATE `DiaCrypt`.`User` SET `Username` = ?, `Password` = ?, `EncryptionPassword` = ? WHERE `ID` = ?;";
 
         MariaDbContext.getInstance().GetUser(user.ID);
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setString(1, user.Username);
             prepStatement.setString(2, user.Password);
+            prepStatement.setString(3, user.EncryptionPassword);
             prepStatement.setInt(3, user.ID);
 
             return prepStatement.executeUpdate() == 1;
@@ -308,7 +331,7 @@ public abstract class SqlDbContextMethods implements IDbContext {
     public boolean PutPage(Page page) throws SQLException {
         String sqlStatement = "UPDATE `DiaCrypt`.`Page` SET `Number` = ?, `Text` = ? WHERE `ID` = ?;";
 
-        MariaDbContext.getInstance().GetDiary(page.ID);
+        MariaDbContext.getInstance().GetPage(page.ID);
 
         try (PreparedStatement prepStatement = conn.prepareStatement(sqlStatement)) {
             prepStatement.setInt(1, page.Number);

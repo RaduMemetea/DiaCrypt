@@ -13,22 +13,23 @@ import java.sql.SQLException;
 
 public class mainWindow {
 
+    public DefaultMutableTreeNode selectedNode = null;
+
     private JButton addButton;
     private JButton editButton;
+    private JButton logOutButton;
+    private JButton deleteButton;
+    private JButton saveButton;
 
     public JPanel mainPanel;
     public JTree diariesTree;
-    private JButton logOutButton;
-    private JButton saveButton;
     private JTextPane pageTextPane;
-    private JButton cancelButton;
-    private JButton deleteButton;
+
 
     private Focus addFocus;
     private Focus editFocus;
     private Focus deleteFocus;
-
-    private final Node selectedNode = new Node();
+    private JButton cancelButton;
     private boolean inPageEdit = false;
 
     public mainWindow() {
@@ -67,28 +68,22 @@ public class mainWindow {
                         exception.printStackTrace();
                         return;
                     }
+
                 }
 
                 case DIARY -> {
 
-                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof FullDiary fullDiary))
+                    if (selectedNode == null || !(selectedNode.getUserObject() instanceof FullDiary fullDiary))
                         return;
 
-                    Page newPage;
-
                     try {
-                        newPage = SecurityHandler.addPage("", (fullDiary.ID));
+                        SecurityHandler.addPage("", (fullDiary.ID));
                     } catch (Exception exception) {
                         JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                         exception.printStackTrace();
                         return;
                     }
-
-                    setPageEditFocus();
-                    guiHandler.getInstance().frame.setTitle("Edit: " + (fullDiary.Title + " - page: " + newPage.Number));
-
                 }
-
             }
             updateTree();
 
@@ -99,7 +94,7 @@ public class mainWindow {
             switch (editFocus) {
                 case DIARY -> {
 
-                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof FullDiary fullDiary))
+                    if (selectedNode == null || !(selectedNode.getUserObject() instanceof FullDiary fullDiary))
                         return;
 
                     var input = JOptionPane.showInputDialog(new JFrame(), "New diary title:");
@@ -133,21 +128,21 @@ public class mainWindow {
                         exception.printStackTrace();
                     }
 
+                    updateTree();
 
                 }
 
                 case PAGE -> {
 
-                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof Page page))
+                    if (selectedNode == null || !(selectedNode.getUserObject() instanceof Page page))
                         return;
 
                     setPageEditFocus();
-                    guiHandler.getInstance().frame.setTitle("Edit: " + (((FullDiary) ((DefaultMutableTreeNode) selectedNode.object.getParent()).getUserObject())).Title + " - page: " + page.Number);
+                    guiHandler.getInstance().frame.setTitle("Edit: " + (((FullDiary) ((DefaultMutableTreeNode) selectedNode.getParent()).getUserObject())).Title + " - page: " + page.Number);
 
                 }
 
             }
-            updateTree();
 
         });
 
@@ -155,24 +150,34 @@ public class mainWindow {
             switch (deleteFocus) {
                 case DIARY -> {
 
-                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof FullDiary fullDiary))
+                    if (selectedNode == null || !(selectedNode.getUserObject() instanceof FullDiary fullDiary))
                         return;
 
                     if (JOptionPane.showConfirmDialog(new JFrame(), "Are you sure you want to delete diary " + fullDiary.Title + "?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
                         return;
 
-                    SecurityHandler.deleteDiary(fullDiary.ID);
+                    try {
+                        SecurityHandler.deleteDiary(fullDiary.ID);
+                    } catch (SQLException exception) {
+                        JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+                        exception.printStackTrace();
+                    }
                 }
 
                 case PAGE -> {
 
-                    if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof Page page))
+                    if (selectedNode == null || !(selectedNode.getUserObject() instanceof Page page))
                         return;
 
                     if (JOptionPane.showConfirmDialog(new JFrame(), "Are you sure you want to delete page " + page.Number + "?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
                         return;
 
-                    SecurityHandler.deletePage(page.ID);
+                    try {
+                        SecurityHandler.deletePage(page.ID);
+                    } catch (Exception exception) {
+                        JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+                        exception.printStackTrace();
+                    }
                 }
 
             }
@@ -185,13 +190,13 @@ public class mainWindow {
 
             if (!inPageEdit) return;
 
-            if (selectedNode.object == null || !(selectedNode.object.getUserObject() instanceof Page page)) {
+            if (selectedNode == null || !(selectedNode.getUserObject() instanceof Page page)) {
                 JOptionPane.showMessageDialog(new JFrame(), "The page could not be saved!", "Error!", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (pageTextPane.getText().length() >= (2 ^ 16)) {
-                JOptionPane.showMessageDialog(new JFrame(), "The text is to long, you are `" + (pageTextPane.getText().length() - (2 ^ 16) + 1) + "` characters over the limit", "Warning!", JOptionPane.WARNING_MESSAGE);
+            if (pageTextPane.getText().length() >= (2 << 16)) {
+                JOptionPane.showMessageDialog(new JFrame(), "The text is to long, you are `" + (pageTextPane.getText().length() - (2 << 16) + 1) + "` characters over the limit", "Warning!", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -242,18 +247,16 @@ public class mainWindow {
 
             if (node.isLeaf()) {
                 enablePageFocus();
-                selectedNode.type = Focus.PAGE;
-                selectedNode.object = node;
+                selectedNode = node;
 
-                if (selectedNode.object.getUserObject() instanceof Page page)
+                if (selectedNode.getUserObject() instanceof Page page)
                     pageTextPane.setText(page.Text);
 
                 return;
             }
 
             enableDiaryFocus();
-            selectedNode.type = Focus.DIARY;
-            selectedNode.object = node;
+            selectedNode = node;
 
 
         });
@@ -263,8 +266,7 @@ public class mainWindow {
     private void enableDefaultFocus() {
 
         setButtonsFocus(Focus.NULL);
-        selectedNode.type = Focus.NULL;
-        selectedNode.object = null;
+        selectedNode = null;
 
         addButton.setEnabled(false);
         addButton.setVisible(false);
@@ -291,8 +293,7 @@ public class mainWindow {
     private void enableRootFocus() {
         enableDefaultFocus();
         setButtonsFocus(Focus.ROOT);
-        selectedNode.type = Focus.ROOT;
-        selectedNode.object = null;
+        selectedNode = null;
 
         addButton.setEnabled(true);
         addButton.setVisible(true);
@@ -362,6 +363,9 @@ public class mainWindow {
     }
 
     private void updateTree() {
+        AuthUser.getInstance().refreshDiaries();
+        diariesTree.setModel(AuthUser.getInstance().getTree());
+
         //todo do this, its important!
     }
 
@@ -371,11 +375,6 @@ public class mainWindow {
         ROOT,
         DIARY,
         PAGE
-    }
-
-    private static class Node {
-        public Focus type;
-        public DefaultMutableTreeNode object;
     }
 
 }

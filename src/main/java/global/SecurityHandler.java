@@ -13,7 +13,9 @@ public class SecurityHandler {
 
 
     public static String Argon2Generate(char[] pass) {
+
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 32, 64);
+
         String hash;
         try {
             hash = argon2.hash(10, 1024 * 1024, 4, pass);
@@ -34,6 +36,23 @@ public class SecurityHandler {
 
     public static String Base64Decode(String text) {
         return new String(Base64.getDecoder().decode(text));
+    }
+
+    public static String aesEncrypt(String text) {
+        return null;
+    }
+
+    public static String aesDecrypt(String text) {
+        return null;
+    }
+
+
+    private static String deriveEncryptedKey(char[] password) {
+        return null;
+    }
+
+    private static String decryptKey(char[] password) {
+        return null;
     }
 
 
@@ -58,6 +77,7 @@ public class SecurityHandler {
         var user = MariaDbContext.getInstance().GetUser(username);
         var okPass = Argon2Verify(password, user.Password);
         if (!okPass) throw new Exception("Incorrect username or password!");
+        user.EncryptionPassword = decryptKey(password);//decrypt the key with password
 
         AuthUser.getInstance().SetUser(user);
         AuthUser.getInstance().refreshDiaries();
@@ -68,9 +88,13 @@ public class SecurityHandler {
         validateUsername(username);
         validatePassword(password1, password2);
 
+        for (var c : password2) c = 0;
+
         User u = new User();
         u.Username = username;
+        u.EncryptionPassword = deriveEncryptedKey(password1);//generate a key encrypted with password
         u.Password = Argon2Generate(password1);
+
         u.ID = MariaDbContext.getInstance().PostUser(u).ID;
 
         MariaDbContext.getInstance().GetUser(u.ID);
@@ -85,8 +109,9 @@ public class SecurityHandler {
         if (title.length() > 1000) throw new Exception("Title to long!");
 
         var dia = new Diary();
-        dia.Title = title;
+        dia.Title = aesEncrypt(title);
         dia.ID = MariaDbContext.getInstance().PostDiary(dia).ID;
+
 
         var ud = new UserDiary();
         ud.DiaryID = dia.ID;
@@ -105,7 +130,7 @@ public class SecurityHandler {
         MariaDbContext.getInstance().GetDiary(diaryID);
 
         var page = new Page();
-        page.Text = pageText;
+        page.Text = aesEncrypt(pageText);
         page.Number = MariaDbContext.getInstance().GetDiaryPages(diaryID).size() + 1;
         page.ID = MariaDbContext.getInstance().PostPage(page).ID;
 
@@ -119,31 +144,27 @@ public class SecurityHandler {
     }
 
 
-    public static void deletePage(Integer id) {
+    public static void deletePage(Integer id) throws Exception {
         if (id < 1) return;
+        if (MariaDbContext.getInstance().GetDiaryPages(MariaDbContext.getInstance().GetPageDiary(id).DiaryID).size() <= 1)
+            throw new Exception("Page could not be deleted because it's the only one remaining.");
 
-        try {
-            MariaDbContext.getInstance().DeletePage(id);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        MariaDbContext.getInstance().DeletePage(id);
     }
 
-    public static void deleteDiary(Integer id) {
+    public static void deleteDiary(Integer id) throws SQLException {
         if (id < 1) return;
 
-        try {
-            MariaDbContext.getInstance().DeleteDiary(id);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        MariaDbContext.getInstance().DeleteDiary(id);
     }
 
     public static void updateDiaryTitle(FullDiary fullDiary) throws SQLException {
+        fullDiary.Title = aesEncrypt(fullDiary.Title);
         MariaDbContext.getInstance().PutDiary(fullDiary.getDiary());
     }
 
     public static void updatePage(Page page) throws SQLException {
+        page.Text = aesEncrypt(page.Text);
         MariaDbContext.getInstance().PutPage(page);
     }
 }
