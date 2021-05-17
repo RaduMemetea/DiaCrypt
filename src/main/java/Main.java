@@ -1,5 +1,5 @@
-import databaseContext.*;
-import userInterface.*;
+import databaseContext.MariaDbContext;
+import global.userInterface.guiHandler;
 
 import java.sql.SQLException;
 

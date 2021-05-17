@@ -5,12 +5,14 @@ import dataModels.User;
 import dataModels.complex.FullDiary;
 import databaseContext.MariaDbContext;
 
+import javax.crypto.SecretKey;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.util.Collections;
 import java.util.List;
 
 public class AuthUser extends User {
+    public SecretKey secretKey;
 
     private static AuthUser instance = null;
 

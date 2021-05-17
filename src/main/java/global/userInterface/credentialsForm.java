@@ -1,4 +1,4 @@
-package userInterface;
+package global.userInterface;
 
 import global.SecurityHandler;
 

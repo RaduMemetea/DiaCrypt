@@ -1,6 +1,7 @@
 package databaseContext;
 
-import java.sql.*;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class MariaDbContext extends SqlDbContextMethods {
     private static MariaDbContext instance = null;

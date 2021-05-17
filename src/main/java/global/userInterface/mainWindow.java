@@ -1,4 +1,4 @@
-package userInterface;
+package global.userInterface;
 
 import dataModels.Page;
 import dataModels.complex.FullDiary;
@@ -123,7 +123,7 @@ public class mainWindow {
 
                     try {
                         SecurityHandler.updateDiaryTitle(fullDiary);
-                    } catch (SQLException exception) {
+                    } catch (Exception exception) {
                         JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                         exception.printStackTrace();
                     }
@@ -209,7 +209,7 @@ public class mainWindow {
 
             try {
                 SecurityHandler.updatePage(page);
-            } catch (SQLException exception) {
+            } catch (Exception exception) {
                 JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                 exception.printStackTrace();
                 return;
@@ -365,8 +365,6 @@ public class mainWindow {
     private void updateTree() {
         AuthUser.getInstance().refreshDiaries();
         diariesTree.setModel(AuthUser.getInstance().getTree());
-
-        //todo do this, its important!
     }
 
 

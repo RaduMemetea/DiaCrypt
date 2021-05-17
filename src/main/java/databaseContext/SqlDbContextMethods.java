@@ -1,7 +1,7 @@
 package databaseContext;
 
 import dataModels.*;
-import dataModels.complex.*;
+import dataModels.complex.FullDiary;
 
 import java.sql.*;
 import java.util.ArrayList;
