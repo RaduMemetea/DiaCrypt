@@ -157,7 +157,18 @@ public class SecurityHandler {
     public static void createUser(String username, char[] password1, char[] password2) throws Exception {
         validateUsername(username);
         validatePassword(password1, password2);
-        if (MariaDbContext.getInstance().GetUser(username) != null) throw new Exception("Username already registered!");
+
+        boolean flag;
+
+        try {
+            MariaDbContext.getInstance().GetUser(username);
+            flag = true;
+        } catch (Exception exception) {
+            flag = false;
+        }
+
+        if (flag) throw new Exception("Username already registered!");
+
 
         Arrays.fill(password2, (char) 0);
 

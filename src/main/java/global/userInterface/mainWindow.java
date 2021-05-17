@@ -13,24 +13,23 @@ import java.sql.SQLException;
 
 public class mainWindow {
 
-    public DefaultMutableTreeNode selectedNode = null;
-
-    private JButton addButton;
-    private JButton editButton;
-    private JButton logOutButton;
-    private JButton deleteButton;
-    private JButton saveButton;
-
     public JPanel mainPanel;
     public JTree diariesTree;
+    public DefaultMutableTreeNode selectedNode = null;
+    private JButton addButton;
+    private JButton editButton;
+    private JButton deleteButton;
+    private JButton saveButton;
+    private JButton logOutButton;
     private JTextPane pageTextPane;
 
 
     private Focus addFocus;
     private Focus editFocus;
     private Focus deleteFocus;
-    private JButton cancelButton;
+
     private boolean inPageEdit = false;
+    private JButton cancelButton;
 
     public mainWindow() {
 
@@ -245,19 +244,18 @@ public class mainWindow {
                 return;
             }
 
-            if (node.isLeaf()) {
-                enablePageFocus();
+
+            if (node.getUserObject() instanceof FullDiary) {
+                enableDiaryFocus();
                 selectedNode = node;
-
-                if (selectedNode.getUserObject() instanceof Page page)
-                    pageTextPane.setText(page.Text);
-
                 return;
             }
 
-            enableDiaryFocus();
-            selectedNode = node;
-
+            if (node.getUserObject() instanceof Page page) {
+                enablePageFocus();
+                selectedNode = node;
+                pageTextPane.setText(page.Text);
+            }
 
         });
 

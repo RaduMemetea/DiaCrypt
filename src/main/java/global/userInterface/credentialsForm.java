@@ -4,7 +4,6 @@ import global.SecurityHandler;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.SQLException;
 
 public class credentialsForm {
     public JPanel mainPanel;
@@ -17,7 +16,8 @@ public class credentialsForm {
 
     public credentialsForm(boolean formType) {
 
-        if (formType) {       // True for login; False for register
+        // True for login; False for register
+        if (formType) {
             submitButton.setText("Log in");
             mainPanel.setPreferredSize(new Dimension(250, 130));
         } else {
@@ -36,9 +36,6 @@ public class credentialsForm {
             if (formType) {
                 try {
                     SecurityHandler.createUserSession(usernameField.getText(), passwordField.getPassword());
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
-                    return;
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                     exception.printStackTrace();
@@ -49,9 +46,6 @@ public class credentialsForm {
             } else {
                 try {
                     SecurityHandler.createUser(usernameField.getText(), passwordField.getPassword(), passwordField2.getPassword());
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
-                    return;
                 } catch (Exception exception) {
                     JOptionPane.showMessageDialog(new JFrame(), exception.getMessage(), "Warning!", JOptionPane.WARNING_MESSAGE);
                     exception.printStackTrace();

@@ -42,7 +42,6 @@ public class MariaDbContext extends SqlDbContextMethods {
 
         Class.forName(JDBC_DRIVER);
         conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
     }
 
     public void Close() throws SQLException {
