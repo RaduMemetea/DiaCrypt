@@ -72,8 +72,9 @@ public class SecurityHandler {
         var salt2 = aesUtil.generateSalt();
         var secretKey2 = aesUtil.deriveKeyFromPassword(password, salt2);
 
-
+        // This key can be stored on a second system to facilitate implementing forgotten password process without needing to encrypt all the diaries again
         var b64EncryptionKey = Base64.getEncoder().encodeToString(secretKey1.getEncoded());
+
         var iv = aesUtil.generateIV();
 
         var encryptedEK = aesUtil.encrypt(b64EncryptionKey.getBytes(StandardCharsets.UTF_8), secretKey2, iv);
@@ -108,20 +109,40 @@ public class SecurityHandler {
     }
 
 
-    public static void validateUsername(String username) {
+    public static void validateUsername(String username) throws Exception {
+        if (username == null) throw new Exception("Invalid Username!");
+        if (username.equals("")) throw new Exception("Invalid Username!");
+        if (username.length() < 4) throw new Exception("Username to short!");
+        if (username.length() > 100) throw new Exception("Username to long!");
 
     }
 
-    public static void validatePassword(String username, char[] password) {
+    public static void validatePassword(char[] password) throws Exception {
+        if (password == null) throw new Exception("Invalid Password!");
+        if (password.length < 8) throw new Exception("Password to short!");
+        if (password.length > 100) throw new Exception("Password to long!");
     }
 
-    public static void validatePassword(char[] password1, char[] password2) {
+    public static void validatePassword(char[] password1, char[] password2) throws Exception {
+        try {
+            validatePassword(password1);
+        } catch (Exception exception) {
+            throw new Exception("1:" + exception.getMessage());
+        }
+
+        try {
+            validatePassword(password2);
+        } catch (Exception exception) {
+            throw new Exception("2:" + exception.getMessage());
+        }
+
+        if (!Arrays.equals(password1, password2)) throw new Exception("Passwords do not match!");
     }
 
 
     public static void createUserSession(String username, char[] password) throws Exception {
         validateUsername(username);
-        validatePassword(username, password);
+        validatePassword(password);
 
         var user = MariaDbContext.getInstance().GetUser(username);
         var okPass = Argon2Verify(password, user.Password);
@@ -136,6 +157,7 @@ public class SecurityHandler {
     public static void createUser(String username, char[] password1, char[] password2) throws Exception {
         validateUsername(username);
         validatePassword(password1, password2);
+        if (MariaDbContext.getInstance().GetUser(username) != null) throw new Exception("Username already registered!");
 
         Arrays.fill(password2, (char) 0);
 
