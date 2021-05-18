@@ -78,7 +78,9 @@ public class AuthUser extends User {
 
                 if (diary.Pages != null) {
                     Collections.sort(diary.Pages);
+                    int n = 0;
                     for (Page page : diary.Pages) {
+                        page.Number = ++n;
                         DefaultMutableTreeNode pageNode = new DefaultMutableTreeNode(page, false);
                         diaryNode.add(pageNode);
                     }

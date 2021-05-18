@@ -194,8 +194,8 @@ public class mainWindow {
                 return;
             }
 
-            if (pageTextPane.getText().length() >= (2 << 16)) {
-                JOptionPane.showMessageDialog(new JFrame(), "The text is to long, you are `" + (pageTextPane.getText().length() - (2 << 16) + 1) + "` characters over the limit", "Warning!", JOptionPane.WARNING_MESSAGE);
+            if (pageTextPane.getText().length() >= ((2 << 16) / 4)) {
+                JOptionPane.showMessageDialog(new JFrame(), "The text is to long, you are `" + (pageTextPane.getText().length() - ((2 << 16) / 4) + 1) + "` characters over the limit", "Warning!", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -216,6 +216,7 @@ public class mainWindow {
 
             enableDefaultFocus();
             guiHandler.getInstance().frame.setTitle("DiaCrypt");
+            updateTree();
         });
 
         cancelButton.addActionListener(e -> {
