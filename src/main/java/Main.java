@@ -8,6 +8,11 @@ public class Main {
 
     public static void main(String[] args) {// it's required that arg0 is the database connection username and arg1 is the password
 
+        if (args.length < 2) {
+            System.err.println("No username and password given");
+            JOptionPane.showMessageDialog(new JFrame(), "No username and password given", "Error!", JOptionPane.ERROR_MESSAGE);
+        }
+
         try {
             MariaDbContext.createInstance(args[0], args[1]); //Initialize the database driver, instance and connection.
         } catch (SQLException exception) {
